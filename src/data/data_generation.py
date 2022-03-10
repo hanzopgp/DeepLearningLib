@@ -1,20 +1,20 @@
 import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 
 class DataGeneration:
 
-	def __init__(self, points, classes):
+	def __init__(self, points, classes=1):
 		self.points = points
 		self.classes = classes
 		self.x = []
 		self.y = [] 
 
 	def make_vertical_data(self):
-		x = np.zeros((samples*self.classes, 2))
-		y = np.zeros(samples*self.classes, dtype='uint8')
+		x = np.zeros((self.points*self.classes, 2))
+		y = np.zeros(self.points*self.classes, dtype='uint8')
 		for class_number in range(self.classes):
-			ix = range(samples*class_number, samples*(class_number+1))
-			x[ix] = np.c_[np.random.randn(samples)*.1 + (class_number)/3, np.random.randn(samples)*.1 + 0.5]
+			ix = range(self.points*class_number, self.points*(class_number+1))
+			x[ix] = np.c_[np.random.randn(self.points)*.1 + (class_number)/3, np.random.randn(self.points)*.1 + 0.5]
 			y[ix] = class_number
 		self.x = x
 		self.y = y
@@ -31,12 +31,18 @@ class DataGeneration:
 		self.x = x
 		self.y = y
 
-	def make_sinus_data(self, samples=1000):
-		self.x = np.arange(samples).reshape(-1, 1) / samples
-		self.y = np.sin(2 * np.pi * X).reshape(-1, 1)
+	def make_sinus_data(self):
+		x = np.arange(self.points).reshape(-1, 1) / self.points
+		y = np.sin(2 * np.pi * x).reshape(-1, 1)
+		print(x.shape)
+		print(y.shape)
+		self.x = x
+		self.y = y
 
 	def display_data(self):
-		plt.scatter(self.x[:, 0], self.x[:, 1])
-		plt.show()
-		plt.scatter(self.x[:, 0], self.x[:, 1], c=self.y, cmap="brg")
-		plt.show()
+		if self.x.shape[1] > 1:
+			plt.scatter(self.x[:, 0], self.x[:, 1], c=self.y, cmap="brg")
+			plt.show()
+		else:
+			plt.scatter(self.x, self.y)
+			plt.show()
