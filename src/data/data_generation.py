@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 
 class DataGeneration:
 
-	def __init__(self, points, classes=1):
+	def __init__(self, points, classes):
 		self.points = points
 		self.classes = classes
 		self.x = []
@@ -32,10 +32,9 @@ class DataGeneration:
 		self.y = y
 
 	def make_sinus_data(self):
-		x = np.arange(self.points).reshape(-1, 1) / self.points
-		y = np.sin(2 * np.pi * x).reshape(-1, 1)
-		print(x.shape)
-		print(y.shape)
+		eps = (np.random.randn(self.points).reshape(-1, 1))*.1 + 0.5
+		x = np.arange(self.points).reshape(-1, 1) / self.points - eps
+		y = np.sin(2 * np.pi * x).reshape(-1, 1) - eps
 		self.x = x
 		self.y = y
 
