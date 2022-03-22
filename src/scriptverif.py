@@ -16,7 +16,7 @@ maxpool1D = MaxPool1D(k_size=2,stride=2)
 flatten = Flatten()
 
 mse = MSE()
-bce = BCE()
+bce = BinaryCrossEntropy()
 crossentr = CrossEntropy() #cross entropy avec log softmax
 
 ## Lineaire et MSE
