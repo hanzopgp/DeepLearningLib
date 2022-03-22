@@ -8,8 +8,9 @@ class Tanh(Module):
 		self._parameters -= learning_rate*self._gradient
 
 	def backward_update_gradient(self, input, delta):
-		self._gradient = np.multiply(1 - np.tanh(input)**2, delta)
+		res = 1 - np.tanh(input)**2
+		self._gradient = res @ delta
 		return self._gradient
 
 	def backward_delta(self, input, delta):
-		return np.multiply(input, delta)
+		return input @ delta

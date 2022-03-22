@@ -13,12 +13,12 @@ class Softmax(Module):
 		input_size = input.shape[0]
 		input_vector = input.reshape(input_size, 1)
 		input_matrix = np.tile(input_vector, input_size) # np.tile repeats the <input_vector> array <input_size> times
-		res = np.diag(input) - (input_matrix * input_matrix.T) + delta
-		self._gradient = np.multiply(res, delta)
+		res = np.diag(input) - (input_matrix * input_matrix.T)
+		self._gradient = res @ delta
 		return self._gradient
 
 	def backward_delta(self, input, delta):
-		return np.multiply(input, delta)
+		return input @ delta
 
 # Quotient rule for derivatives
 # Derivatives are 0 if i!=j and exp(x_j) else. (i and j are the index of the classes)

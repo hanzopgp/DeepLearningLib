@@ -8,8 +8,8 @@ class ReLU(Module):
 		self._parameters -= learning_rate*self._gradient
 
 	def backward_update_gradient(self, input, delta):
-		self._gradient += np.multiply(np.where(input > 0, 1, 0), delta)
+		self._gradient += np.where(input > 0, 1, 0) @ delta
 		return self._gradient
 
 	def backward_delta(self, input, delta):
-		return np.multiply(input, delta)
+		return input @ delta
