@@ -11,3 +11,4 @@ if __name__ == '__main__':
 
 	data_generation.make_sinus_data()
 	data_generation.display_data()
+
