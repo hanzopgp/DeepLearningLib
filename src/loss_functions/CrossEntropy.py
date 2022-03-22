@@ -1,6 +1,6 @@
 from Core import *
 
-#https://peltarion.com/knowledge-center/documentation/modeling-view/build-an-ai-model/loss-functions/categorical-crossentropy
+# Source: https://peltarion.com/knowledge-center/documentation/modeling-view/build-an-ai-model/loss-functions/categorical-crossentropy
 
 class CrossEntropy(Loss):
 	def forward(self, y, yhat):

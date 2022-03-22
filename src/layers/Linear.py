@@ -8,18 +8,15 @@ class Linear(Module):
 		self.zero_grad()
 
 	def zero_grad(self):
-		## Annule gradient
 		self._gradient = np.zeros_like(self._parameters)
 
-	def forward(self, X):
-		## Calcule la passe forward
-		return np.dot(X.T, self._parameters) + self._bias
+	def forward(self, input):
+		self._output = input @ self._parameters + self._bias
+		return input @ self._parameters + self._bias
 
 	def backward_update_gradient(self, input, delta):
-		## Met a jour la valeur du gradient
-		raise NotImplementedError()
+		self._gradient += input.T @ delta
+		return self._gradient
 		
-
 	def backward_delta(self, input, delta):
-		## Calcul la derivee de l'erreur
-		raise NotImplementedError()
+		return input @ self._parameters + delta
