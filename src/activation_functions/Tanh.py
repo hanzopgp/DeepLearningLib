@@ -9,8 +9,8 @@ class Tanh(Module):
 
 	def backward_update_gradient(self, input, delta):
 		res = 1 - np.tanh(input)**2
-		self._gradient = res @ delta
+		self._gradient = res * delta
 		return self._gradient
 
 	def backward_delta(self, input, delta):
-		return input @ delta
+		return input * delta

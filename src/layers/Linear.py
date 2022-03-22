@@ -15,7 +15,7 @@ class Linear(Module):
 		return self._output
 
 	def backward_update_gradient(self, input, delta):
-		self._gradient += input.T @ delta 
+		self._gradient += input.T * delta 
 		return self._gradient
 		
 	def backward_delta(self, input, delta):
