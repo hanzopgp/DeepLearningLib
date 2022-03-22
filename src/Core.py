@@ -9,15 +9,6 @@ class Loss():
 	def backward(self, y, yhat):
 		raise NotImplementedError()
 
-class Activation():
-	## Computes forward pass
-	def forward(self, y, yhat):
-		raise NotImplementedError()
-
-	## Computes backward pass
-	def backward(self, y, yhat):
-		raise NotImplementedError()
-
 class Module():
 	def __init__(self):
 		self._parameters = None
@@ -35,7 +26,7 @@ class Module():
 	def update_parameters(self, learning_rate=1e-3):
 		self._parameters -= learning_rate*self._gradient
 
-	## ???
+	## Computes and adds the gradient (adding in case we use minibatch/batch gradient descent)
 	def backward_update_gradient(self, input, delta):
 		raise NotImplementedError()
 
