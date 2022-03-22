@@ -15,8 +15,8 @@ class Linear(Module):
 		return self._output
 
 	def backward_update_gradient(self, input, delta):
-		self._gradient += input.T @ delta # we need += in case we use minibatch/batch gradient descent
+		self._gradient += input.T @ delta 
 		return self._gradient
 		
 	def backward_delta(self, input, delta):
-		return input @ self._parameters + delta
+		return input @ self._parameters * delta
