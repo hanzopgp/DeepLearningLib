@@ -4,10 +4,9 @@ from Core import *
 
 class Softmax(Module):
 	def forward(self, input):
-		return np.exp(input) / np.sum(np.exp(input))
-
-	def update_parameters(self, learning_rate=1e-3):
-		self._parameters -= learning_rate*self._gradient
+		self._input = input
+		exp_ = np.exp(self._input)
+		return exp_ / np.sum(exp_)
 
 	def backward_update_gradient(self, input, delta):
 		input_size = input.shape[0]

@@ -8,16 +8,22 @@ class Sequential(Module):
 		self.network.append(module)
 
 	def forward(self, input):
-		for module in self.network:
-			input = module.forward(input)
-		return input
-
-	def backward_update_gradient(self, input, delta):
-		self.network[0].backward_update_gradient(input, delta)
+		self.network[0].forward(input)
 		for i in range(1, len(self.network)):
-			self.network[i].backward_update_gradient(self.network[i-1]._input, self.network[i-1]last_module._delta)
+			self.network[i].forward(self.network[i-1]._input)
 
-	def backward_delta(self, input, delta):
+	def update_parameters(self, learning_rate=0.001):
 		for module in self.network:
-			input, delta = module.backward_delta(input, delta)
-		return input
+			module.update_parameters(learning_rate)
+
+	def backward_update_gradient(self, grad_input, delta):
+		last_index = len(self.network) - 1
+		self.network[last_index].backward_update_gradient(grad_input, delta)
+		for i in range(last_index, 0, -1):
+			self.network[i-1].backward_update_gradient(self.network[i]._grad_input, self.network[i]._delta)
+
+	def backward_delta(self, grad_input, delta):
+		last_index = len(self.network) - 1
+		self.network[last_index].backward_delta(grad_input, delta)
+		for i in range(last_index, 0, -1):
+			self.network[i-1].backward_delta(self.network[i]._grad_input, self.network[i]._delta)
