@@ -15,6 +15,7 @@ from module.Sequential import Sequential
 
 import numpy as np
 
+
 if __name__ == '__main__':
 
 	## Generation of some data (x1,x2 points with class y)
@@ -26,17 +27,13 @@ if __name__ == '__main__':
 	## Hidden layers, activation functions and loss function
 	linear1 = Linear(X.shape[1], 32)
 	linear2 = Linear(32, len(np.unique(y)))
-	sigmoid = Sigmoid()
-	tanh = Tanh()
 	bce = BinaryCrossEntropy()
 
 	## Forward pass
 	model = Sequential()
-	model.add(linear1)
-	model.add(tanh)
-	model.add(linear2)
-	model.add(sigmoid)
-	model.add(bce)
+	model.add(linear1, activation="tanh")
+	model.add(linear2, activation="sigmoid")
+	model.compile(bce)
 	model.forward(X)
 
 	## Backward pass

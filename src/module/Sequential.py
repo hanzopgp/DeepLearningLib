@@ -1,10 +1,26 @@
 from Core import *
 
+from activation_functions.ReLU import ReLU
+from activation_functions.Sigmoid import Sigmoid
+from activation_functions.Softmax import Softmax
+from activation_functions.Tanh import Tanh
+
 class Sequential(Module):
 	def __init__(self):
 		self.network = []
 
-	def add(self, module):
+	def add(self, module, activation):
+		self.network.append(module)
+		if activation == "relu":
+			self.network.append(ReLU())
+		elif activation == "sigmoid":
+			self.network.append(Sigmoid())
+		elif activation == "tanh":
+			self.network.append(Tanh())
+		elif activation == "softmax":
+			self.network.append(Softmax())
+
+	def compile(self, module):
 		self.network.append(module)
 
 	def forward(self, input):
