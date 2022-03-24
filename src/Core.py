@@ -19,7 +19,9 @@ class Module():
 		raise NotImplementedError()
 
 	## Computes forward pass
-	def forward(self, X):
+	## The forward pass is the commputation of output thanks to <input> (and parameters if the module contains parameters)
+	## The forward pass can occur on a layer, an activation function or a loss function.
+	def forward(self, input):
 		raise NotImplementedError()
 
 	## Updates the <_parameters> according to the <_gradient> and the <learning_rate>
