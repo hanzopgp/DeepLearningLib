@@ -1,5 +1,6 @@
 from Core import *
 
+
 class GradientDescent(Optimizer):
 	def __init__(self, net, loss_function, learning_rate):
 		super().__init__()
@@ -7,7 +8,8 @@ class GradientDescent(Optimizer):
 		self.net.network.append(loss_function)
 		self.learning_rate = learning_rate
 
-	def step(self, batch_x, batch_y):
-		self.net.forward(batch_x, batch_y)
+	def step(self, X, y):
+		self.net.zero_grad()
+		self.net.forward(X, y)
 		self.net.backward()
 		self.net.update_parameters(self.learning_rate)

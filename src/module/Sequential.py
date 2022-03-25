@@ -5,7 +5,9 @@ from activation_functions.Sigmoid import Sigmoid
 from activation_functions.Softmax import Softmax
 from activation_functions.Tanh import Tanh
 
-from loss_functions.MSE import MSE
+from loss_functions.MeanSquaredError import MeanSquaredError
+from loss_functions.MeanAbsoluteError import MeanAbsoluteError
+from loss_functions.RootMeanSquaredError import RootMeanSquaredError
 from loss_functions.BinaryCrossEntropy import BinaryCrossEntropy
 from loss_functions.CrossEntropy import CrossEntropy
 from loss_functions.SparseBinaryCrossEntropy import SparseBinaryCrossEntropy
@@ -40,7 +42,11 @@ class Sequential(Module):
 		elif loss == "crossentropy":
 			loss_function = CrossEntropy()
 		elif loss == "mse":
-			loss_function = MSE()
+			loss_function = MeanSquaredError()
+		elif loss == "mae":
+			loss_function = MeanAbsoluteError()
+		elif loss == "rmse":
+			loss_function = RootMeanSquaredError()
 		elif loss == "sparse_binary_crossentropy":
 			loss_function = SparseBinaryCrossEntropy()
 		elif loss == "sparse_crossentropy":
@@ -54,15 +60,27 @@ class Sequential(Module):
 			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate)
 
 	def fit(self, X, y, n_epochs):
+		self._X = X
+		self._y = y
 		for _ in range(n_epochs):
-			self.optimizer.step(X, y)
+			self.optimizer.step(X, self._y)
+			self.update_stats()
+			
+	def predict(self, X):
+		last_module = len(self.network) - 1
+		self.network[0].forward(X)
+		for i in range(1, last_module):
+			self.network[i].forward(self.network[i-1]._output)
+		return self.network[last_module - 1]._output
 
-	def predict(self, input):
-		return self.forward(input)
+	def update_stats(self):
+		last_module = len(self.network) - 1
+		self.loss_values.append(self.network[last_module]._output.mean())
+		self.acc_values.append(self.score(self._X, self._y, type="accuracy"))
 
 	def score(self, X, y, type="accuracy"):
 		if type == "accuracy":
-			print("--> Accuracy:", np.where(y == self.predict(X).argmax(axis=0), 1, 0).mean())
+			return np.where(y == self.predict(X).argmax(axis=1), 1, 0).mean()
 
 	def stats(self):
 		lv = np.array(self.loss_values)
@@ -90,8 +108,13 @@ class Sequential(Module):
 		res = 0
 		for m in self.network:
 			if "layers" in str(type(m)):
-				res += m._parameters.size
+				res += m._parameters.size + m._bias.size
 		return res
+
+	def zero_grad(self):
+		for m in self.network:
+			if "layers" in str(type(m)):
+				m.zero_grad()
 
 	def forward(self, X, y):
 		last_module = len(self.network) - 1
@@ -102,9 +125,6 @@ class Sequential(Module):
 			self.network[i].forward(self.network[i-1]._output)
 		## Forward on the loss module which is the last module of the network
 		self.network[last_module].forward(y, self.network[last_module - 1]._output)
-		self.loss_values.append(self.network[last_module]._output.mean())
-		predictions = self.network[last_module - 1]._output.argmax(axis=1)
-		self.acc_values.append(np.where(predictions == y, 1, 0).mean())
 		## Return the output of the last layer, before the loss module
 		return self.network[last_module - 1]._output
 
