@@ -14,18 +14,16 @@ class Linear(Module):
 		self._gradient = np.zeros_like(self._parameters)
 
 	def forward(self, input):
-		print(input.shape)
-		print(self._parameters.shape)
 		assert(input.shape[1] == self._parameters.shape[0])
 		self._input = input
 		self._output = self._input @ self._parameters + self._bias
 
 	def backward_update_gradient(self, delta):
-		assert(delta.shape == self._gradient.shape)
 		assert(delta.shape == self._output.shape)
+		assert(delta.shape[0] == self._input.shape[0])
 		self._delta = delta
-		self._gradient += self._input * self._delta 
+		self._gradient += self._input.T @ self._delta 
 		assert(self._gradient.shape == self._parameters.shape)
 		
 	def backward_delta(self):
-		self._new_delta = self._parameters * self._delta
+		self._new_delta = self._delta @ self._parameters.T

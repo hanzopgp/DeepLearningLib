@@ -2,7 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class DataGeneration:
-
 	def __init__(self, points, classes):
 		self.points = points
 		self.classes = classes
