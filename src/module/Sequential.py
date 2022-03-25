@@ -11,7 +11,9 @@ from loss_functions.CrossEntropy import CrossEntropy
 from loss_functions.SparseBinaryCrossEntropy import SparseBinaryCrossEntropy
 from loss_functions.SparseCrossEntropy import SparseCrossEntropy
 
-from matplotlib import pyplot as plt
+from optimizer_functions.GradientDescent import GradientDescent
+from optimizer_functions.StochasticGradientDescent import StochasticGradientDescent
+from optimizer_functions.MinibatchGradientDescent import MinibatchGradientDescent
 
 
 class Sequential(Module):
@@ -31,25 +33,29 @@ class Sequential(Module):
 		elif activation == "softmax":
 			self.network.append(Softmax())
 
-	def compile(self, loss, learning_rate):
-		self._learning_rate = learning_rate
+	def compile(self, loss, optimizer, learning_rate):
+		## Choosing a loss function for our network
 		if loss == "binary_crossentropy":
-			self.network.append(BinaryCrossEntropy())
+			loss_function = BinaryCrossEntropy()
 		elif loss == "crossentropy":
-			self.network.append(CrossEntropy())
+			loss_function = CrossEntropy()
 		elif loss == "mse":
-			self.network.append(MSE())
+			loss_function = MSE()
 		elif loss == "sparse_binary_crossentropy":
-			self.network.append(SparseBinaryCrossEntropy())
+			loss_function = SparseBinaryCrossEntropy()
 		elif loss == "sparse_crossentropy":
-			self.network.append(SparseCrossEntropy())
+			loss_function = SparseCrossEntropy()
+		## Choosing and optimizer function for our network
+		if optimizer == "GD":
+			self.optimizer = GradientDescent(self, loss_function, learning_rate)
+		elif optimizer == "SGD":
+			self.optimizer = StochasticGradientDescent(self, loss_function, learning_rate)
+		elif optimizer == "MGD":
+			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate)
 
 	def fit(self, X, y, n_epochs):
-		self._y = y
 		for _ in range(n_epochs):
-			self.forward(X)
-			self.backward()
-			self.update_parameters()
+			self.optimizer.step(X, y)
 
 	def predict(self, input):
 		return self.forward(input)
@@ -87,7 +93,7 @@ class Sequential(Module):
 				res += m._parameters.size
 		return res
 
-	def forward(self, X):
+	def forward(self, X, y):
 		last_module = len(self.network) - 1
 		## First forward pass on data <self._X>
 		self.network[0].forward(X)
@@ -95,16 +101,16 @@ class Sequential(Module):
 		for i in range(1, last_module):
 			self.network[i].forward(self.network[i-1]._output)
 		## Forward on the loss module which is the last module of the network
-		self.network[last_module].forward(self._y, self.network[last_module - 1]._output)
+		self.network[last_module].forward(y, self.network[last_module - 1]._output)
 		self.loss_values.append(self.network[last_module]._output.mean())
 		predictions = self.network[last_module - 1]._output.argmax(axis=1)
-		self.acc_values.append(np.where(predictions == self._y, 1, 0).mean())
+		self.acc_values.append(np.where(predictions == y, 1, 0).mean())
 		## Return the output of the last layer, before the loss module
 		return self.network[last_module - 1]._output
 
-	def update_parameters(self):
+	def update_parameters(self, learning_rate):
 		for i in range(len(self.network) - 1):
-			self.network[i].update_parameters(self._learning_rate)
+			self.network[i].update_parameters(learning_rate)
 
 	def backward(self):
 		loss_function = self.network[len(self.network) - 1]
@@ -114,11 +120,3 @@ class Sequential(Module):
 		for i in range(len(self.network) - 1, 0, -1):
 			self.network[i-1].backward_update_gradient(self.network[i]._new_delta)
 			self.network[i-1].backward_delta()
-
-	# def backward_delta(self, grad_input, delta):
-	# 	last_index = len(self.network) - 1
-	# 	## Backward delta on the loss function
-	# 	self.network[last_index].backward_delta(grad_input, delta)
-	# 	## Backward delta on every previous layers but the first one
-	# 	for i in range(last_index, 1, -1):
-	# 		self.network[i-1].backward_delta(self.network[i]._grad_input, self.network[i].new__delta)

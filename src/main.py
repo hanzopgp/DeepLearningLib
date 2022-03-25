@@ -9,7 +9,7 @@ import numpy as np
 if __name__ == '__main__':
 	data_generation = DataGeneration(points=500, classes=2)
 	data_generation.make_vertical_data()
-	data_generation.display_data()
+	# data_generation.display_data()
 	X, y = data_generation.x, data_generation.y
 
 	n_features = X.shape[1]
@@ -20,9 +20,10 @@ if __name__ == '__main__':
 
 	model = Sequential()
 	model.add(layer=Linear(n_features, n_neurons), activation="tanh")
-	# model.add(layer=Linear(n_neurons, n_neurons), activation="tanh")
 	model.add(layer=Linear(n_neurons, n_classes), activation="sigmoid")
-	model.compile(loss="sparse_binary_crossentropy", learning_rate=learning_rate)
+	model.compile(loss="sparse_binary_crossentropy", 
+				  optimizer="GD",
+				  learning_rate=learning_rate)
 	model.summary()
 	model.fit(X, y, n_epochs=n_epochs)
 

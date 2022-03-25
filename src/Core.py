@@ -1,4 +1,18 @@
 import numpy as np
+from matplotlib import pyplot as plt
+
+
+class Optimizer():
+	def __init__(self):
+		self.net = None
+		self.learning_rate = None
+
+	## Computes network forward pass thanks to batch_x
+	## Computes loss thanks to batch_y and the forward pass output
+	## Executes backward pass to compute gradients
+	## Updates network parameters
+	def step(self, batch_x, batch_y):
+		raise NotImplementedError()
 
 class Loss():
 	## Computes forward pass
