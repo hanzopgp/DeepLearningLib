@@ -13,8 +13,6 @@ class Tanh(Module):
 		assert(self._input.shape == self._output.shape)
 
 	def backward_update_gradient(self, delta):
-		print(delta.shape)
-		print(self._output.shape)
 		assert(delta.shape == self._output.shape)
 		self._delta = delta
 

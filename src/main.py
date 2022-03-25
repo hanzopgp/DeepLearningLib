@@ -38,6 +38,6 @@ if __name__ == '__main__':
 	model.compile(loss_function=sbce, learning_rate=learning_rate)
 	model.summary()
 	model.fit(X, y, n_epochs=n_epochs)
-
-	# pred = model.predict(X)
-	# print(model.score(pred, y))
+	
+	model.stats()
+	model.score(X, y, type="accuracy")

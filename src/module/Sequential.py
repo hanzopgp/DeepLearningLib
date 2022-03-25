@@ -1,4 +1,3 @@
-from tkinter import Y
 from Core import *
 
 from activation_functions.ReLU import ReLU
@@ -6,9 +5,14 @@ from activation_functions.Sigmoid import Sigmoid
 from activation_functions.Softmax import Softmax
 from activation_functions.Tanh import Tanh
 
+from matplotlib import pyplot as plt
+
+
 class Sequential(Module):
 	def __init__(self):
 		self.network = []
+		self.loss_values = []
+		self.acc_values = []
 
 	def add(self, layer, activation):
 		self.network.append(layer)
@@ -29,12 +33,23 @@ class Sequential(Module):
 		self._y = y
 		for _ in range(n_epochs):
 			self.forward(X)
-			self.backward_update_gradient()
-			# self.backward_delta()
+			self.backward()
 			# self.update_parameters()
 
 	def predict(self, input):
 		return self.forward(input)
+
+	def score(self, X, y, type="accuracy"):
+		if type == "accuracy":
+			print(np.where(y == self.predict(X).argmax(axis=0), 1, 0).mean())
+
+	def stats(self):
+		lv = np.array(self.loss_values)
+		plt.plot(lv)
+		plt.show()
+		la = np.array(self.acc_values)
+		plt.plot(la)
+		plt.show()
 
 	def summary(self):
 		print("=========================================================================")
@@ -51,13 +66,16 @@ class Sequential(Module):
 
 	def forward(self, X):
 		last_module = len(self.network) - 1
-		## First forward pass on data <X>
+		## First forward pass on data <self._X>
 		self.network[0].forward(X)
 		## Forward on all the next layers
 		for i in range(1, last_module):
 			self.network[i].forward(self.network[i-1]._output)
 		## Forward on the loss module which is the last module of the network
 		self.network[last_module].forward(self._y, self.network[last_module - 1]._output)
+		self.loss_values.append(self.network[last_module]._output.mean())
+		predictions = self.network[last_module - 1]._output.argmax(axis=0)
+		self.acc_values.append(np.where(predictions == self._y, 1, 0).mean())
 		## Return the output of the last layer, before the loss module
 		return self.network[last_module - 1]._output
 
@@ -65,13 +83,14 @@ class Sequential(Module):
 		for module in self.network:
 			module.update_parameters(self._learning_rate)
 
-	def backward_update_gradient(self):
+	def backward(self):
 		loss_function = self.network[len(self.network) - 1]
 		## Backward pass on the loss function
 		loss_function.backward()
 		## Backward pass on every previous layers
 		for i in range(len(self.network) - 1, 0, -1):
-			self.network[i-1].backward_update_gradient(self.network[i]._delta)
+			self.network[i-1].backward_update_gradient(self.network[i]._new_delta)
+			self.network[i-1].backward_delta()
 
 	# def backward_delta(self, grad_input, delta):
 	# 	last_index = len(self.network) - 1
