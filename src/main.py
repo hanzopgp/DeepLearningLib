@@ -35,23 +35,4 @@ if __name__ == '__main__':
 	model.add(linear2, activation="sigmoid")
 	model.compile(bce)
 	model.forward(X)
-
-	## Backward pass
-	# res_bce = bce.forward(y.reshape(-1,1), res_lin)
-	# delta_mse = bce.backward(y.reshape(-1,1), res_sig)
-	# gradient = linear.backward_update_gradient(X, delta_mse)
-	# delta_lin = linear.backward_delta(X, delta_mse)
-
-	## Updating parameters
-	# linear.update_parameters()
-
-	## 2nd Forward pass
-	# linear.zero_grad()
-	# res_lin = linear.forward(X)
-
-	## 2nd Backward pass
-	# res_bce = bce.forward(y.reshape(-1,1), res_lin)
-	# delta_mse = bce.backward(y.reshape(-1,1), res_lin)
-	# gradient = linear.backward_update_gradient(X, delta_mse)
-	# delta_lin = linear.backward_delta(X, delta_mse)
 	
