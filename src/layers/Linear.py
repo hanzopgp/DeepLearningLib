@@ -33,4 +33,4 @@ class Linear(Module):
 		assert(self._gradient_bias.shape == self._bias.shape)
 		
 	def backward_delta(self):
-		self._new_delta = self._delta @ self._parameters.T
+		self._new_delta = self._delta @ self._parameters.T	

@@ -5,6 +5,12 @@ from activation_functions.Sigmoid import Sigmoid
 from activation_functions.Softmax import Softmax
 from activation_functions.Tanh import Tanh
 
+from loss_functions.MSE import MSE
+from loss_functions.BinaryCrossEntropy import BinaryCrossEntropy
+from loss_functions.CrossEntropy import CrossEntropy
+from loss_functions.SparseBinaryCrossEntropy import SparseBinaryCrossEntropy
+from loss_functions.SparseCrossEntropy import SparseCrossEntropy
+
 from matplotlib import pyplot as plt
 
 
@@ -25,23 +31,32 @@ class Sequential(Module):
 		elif activation == "softmax":
 			self.network.append(Softmax())
 
-	def compile(self, loss_function, learning_rate):
+	def compile(self, loss, learning_rate):
 		self._learning_rate = learning_rate
-		self.network.append(loss_function)
+		if loss == "binary_crossentropy":
+			self.network.append(BinaryCrossEntropy())
+		elif loss == "crossentropy":
+			self.network.append(CrossEntropy())
+		elif loss == "mse":
+			self.network.append(MSE())
+		elif loss == "sparse_binary_crossentropy":
+			self.network.append(SparseBinaryCrossEntropy())
+		elif loss == "sparse_crossentropy":
+			self.network.append(SparseCrossEntropy())
 
 	def fit(self, X, y, n_epochs):
 		self._y = y
 		for _ in range(n_epochs):
 			self.forward(X)
 			self.backward()
-			# self.update_parameters()
+			self.update_parameters()
 
 	def predict(self, input):
 		return self.forward(input)
 
 	def score(self, X, y, type="accuracy"):
 		if type == "accuracy":
-			print(np.where(y == self.predict(X).argmax(axis=0), 1, 0).mean())
+			print("--> Accuracy:", np.where(y == self.predict(X).argmax(axis=0), 1, 0).mean())
 
 	def stats(self):
 		lv = np.array(self.loss_values)
@@ -62,7 +77,15 @@ class Sequential(Module):
 				print(" and activation :", element)
 			elif "loss_functions" in type_:
 				print("Loss :", element)
+		print("Total number of parameters :", self.count_parameters())
 		print("=========================================================================")
+
+	def count_parameters(self):
+		res = 0
+		for m in self.network:
+			if "layers" in str(type(m)):
+				res += m._parameters.size
+		return res
 
 	def forward(self, X):
 		last_module = len(self.network) - 1
@@ -80,8 +103,8 @@ class Sequential(Module):
 		return self.network[last_module - 1]._output
 
 	def update_parameters(self):
-		for module in self.network:
-			module.update_parameters(self._learning_rate)
+		for i in range(len(self.network) - 1):
+			self.network[i].update_parameters(self._learning_rate)
 
 	def backward(self):
 		loss_function = self.network[len(self.network) - 1]
