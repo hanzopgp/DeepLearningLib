@@ -7,9 +7,8 @@ from activation_functions.Softmax import Softmax
 from activation_functions.Tanh import Tanh
 
 class Sequential(Module):
-	def __init__(self, input_shape):
+	def __init__(self):
 		self.network = []
-		self._input_shape = input_shape
 
 	def add(self, layer, activation):
 		self.network.append(layer)
@@ -45,7 +44,7 @@ class Sequential(Module):
 			if "layers" in type_:
 				print("Layer", int(i/2), ":", element, "with parameters_shape =", m._parameters.shape, end="")
 			elif "activation_functions" in type_:
-				print(", Activation :", element)
+				print(" and activation :", element)
 			elif "loss_functions" in type_:
 				print("Loss :", element)
 		print("=========================================================================")
@@ -69,13 +68,15 @@ class Sequential(Module):
 	def backward_update_gradient(self):
 		loss_function = self.network[len(self.network) - 1]
 		## Backward pass on the loss function
-		loss_function.backward(self._y, loss_function._output)
+		loss_function.backward()
 		## Backward pass on every previous layers
 		for i in range(len(self.network) - 1, 0, -1):
 			self.network[i-1].backward_update_gradient(self.network[i]._delta)
 
-	def backward_delta(self, grad_input, delta):
-		last_index = len(self.network) - 1
-		self.network[last_index].backward_delta(grad_input, delta)
-		for i in range(last_index, 0, -1):
-			self.network[i-1].backward_delta(self.network[i]._grad_input, self.network[i]._delta)
+	# def backward_delta(self, grad_input, delta):
+	# 	last_index = len(self.network) - 1
+	# 	## Backward delta on the loss function
+	# 	self.network[last_index].backward_delta(grad_input, delta)
+	# 	## Backward delta on every previous layers but the first one
+	# 	for i in range(last_index, 1, -1):
+	# 		self.network[i-1].backward_delta(self.network[i]._grad_input, self.network[i].new__delta)

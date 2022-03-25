@@ -21,22 +21,18 @@ import numpy as np
 
 
 if __name__ == '__main__':
-
-	## Generation of some data (x1,x2 points with class y)
 	data_generation = DataGeneration(points=100, classes=2)
 	data_generation.make_vertical_data()
 	# data_generation.display_data()
 	X, y = data_generation.x, data_generation.y
 
-	## Hidden layers, activation functions and loss function
 	linear1 = Linear(X.shape[1], 32)
 	linear2 = Linear(32, len(np.unique(y)))
 	sbce = SparseBinaryCrossEntropy()
 	learning_rate = 1e-3
 	n_epochs = 10
 
-	## Forward pass
-	model = Sequential(input_shape=X.shape)
+	model = Sequential()
 	model.add(layer=linear1, activation="tanh")
 	model.add(layer=linear2, activation="sigmoid")
 	model.compile(loss_function=sbce, learning_rate=learning_rate)
@@ -44,4 +40,4 @@ if __name__ == '__main__':
 	model.fit(X, y, n_epochs=n_epochs)
 
 	# pred = model.predict(X)
-	# print(pred)
+	# print(model.score(pred, y))

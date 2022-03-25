@@ -1,6 +1,9 @@
 from Core import *
 
 class ReLU(Module):
+	def zero_grad(self):
+		pass
+	
 	def update_parameters(self, learning_rate):
 		pass
 
@@ -15,4 +18,4 @@ class ReLU(Module):
 
 	def backward_delta(self):
 		gradient = np.where(self._input > 0, 1, 0) * self._delta
-		self._new_delta = gradient @ self._delta
+		self._new_delta = gradient * self._delta

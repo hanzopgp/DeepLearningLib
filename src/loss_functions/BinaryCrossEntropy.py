@@ -5,8 +5,11 @@ from Core import *
 class BinaryCrossEntropy(Loss):
 	def forward(self, y, yhat):
 		assert(y.shape == yhat.shape)
-		return -y*np.log(yhat) + (1-y)*np.log(1-yhat)
+		self._y = y
+		self._yhat = yhat
+		eps = 1e-100
+		self._output = -self._y*np.log(self._yhat+eps) + (1-self._y)*np.log(1-self._yhat+eps)
 
-	def backward(self, y, yhat):
-		assert(y.shape == yhat.shape)
-		return (yhat - y)/ yhat / (1-yhat)
+	def backward(self):
+		assert(self._y.shape == self._yhat.shape)
+		self._new_delta = (self._yhat - self._y)/ self._yhat / (1-self._yhat)

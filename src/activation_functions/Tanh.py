@@ -1,6 +1,9 @@
 from Core import *
 
 class Tanh(Module):
+	def zero_grad(self):
+		pass
+
 	def update_parameters(self, learning_rate):
 		pass
 
@@ -16,6 +19,5 @@ class Tanh(Module):
 		self._delta = delta
 
 	def backward_delta(self):
-		res = 1 - np.tanh(self._input)**2
-		gradient = res * self._delta
-		self._new_delta = gradient @ self._delta
+		gradient = 1 - np.tanh(self._input)**2
+		self._new_delta = gradient * self._delta

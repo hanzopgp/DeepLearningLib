@@ -3,6 +3,9 @@ from Core import *
 # Source: https://aimatters.wordpress.com/2019/06/17/the-softmax-function-derivative/
 
 class Softmax(Module):
+	def zero_grad(self):
+		pass
+
 	def update_parameters(self, learning_rate):
 		pass
 	
@@ -20,9 +23,8 @@ class Softmax(Module):
 		input_size = self._input.shape[0]
 		input_vector = self._input.reshape(input_size, 1)
 		input_matrix = np.tile(input_vector, input_size) ## np.tile repeats the <input_vector> array <input_size> times
-		res = np.diag(self._input) - (input_matrix * input_matrix.T)
-		gradient = res * self._delta
-		self._new_delta = gradient @ self._delta
+		gradient = np.diag(self._input) - (input_matrix * input_matrix.T)
+		self._new_delta = gradient * self._delta
 
 ## Quotient rule for derivatives
 ## Derivatives are 0 if i!=j and exp(x_j) else. (i and j are the index of the classes)

@@ -1,6 +1,9 @@
 from Core import *
 
 class Sigmoid(Module):
+	def zero_grad(self):
+		pass
+	
 	def update_parameters(self, learning_rate):
 		pass
 
@@ -16,4 +19,4 @@ class Sigmoid(Module):
 	def backward_delta(self):
 		exp_ = np.exp(-self._input)
 		gradient = (exp_ / (1 + exp_)**2)
-		self._new_delta = gradient @ self._delta
+		self._new_delta = gradient * self._delta
