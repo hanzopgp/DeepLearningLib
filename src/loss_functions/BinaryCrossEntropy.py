@@ -12,4 +12,5 @@ class BinaryCrossEntropy(Loss):
 
 	def backward(self):
 		assert(self._y.shape == self._yhat.shape)
-		self._new_delta = (self._yhat - self._y)/ self._yhat / (1-self._yhat)
+		eps = 1e-100
+		self._new_delta = ((self._yhat - self._y)/ self._yhat) / (1-self._yhat+eps)

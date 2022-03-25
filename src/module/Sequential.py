@@ -97,7 +97,7 @@ class Sequential(Module):
 		## Forward on the loss module which is the last module of the network
 		self.network[last_module].forward(self._y, self.network[last_module - 1]._output)
 		self.loss_values.append(self.network[last_module]._output.mean())
-		predictions = self.network[last_module - 1]._output.argmax(axis=0)
+		predictions = self.network[last_module - 1]._output.argmax(axis=1)
 		self.acc_values.append(np.where(predictions == self._y, 1, 0).mean())
 		## Return the output of the last layer, before the loss module
 		return self.network[last_module - 1]._output

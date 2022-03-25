@@ -13,4 +13,5 @@ class SparseCrossEntropy(Loss):
 
 	def backward(self):
 		assert(self._y.shape == self._self._yhat.shape)
-		self._new_delta = -self._y/self._self._yhat
+		eps = 1e-100
+		self._new_delta = -self._y/(self._self._yhat+eps)
