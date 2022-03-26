@@ -9,6 +9,7 @@ np.random.seed(42)
 ## TODOLIST:
 ## Fix gradient exploding (is it a bug or we need gradient clipping)
 ## Enhance loss/metric computation, avoid forward pass somehow
+## MSGD is not working, don't know how to implement at the moment
 
 ## * Activation functions:
 ## --> hidden_layer    : relu, sigmoid, softmax, tanh
@@ -30,7 +31,7 @@ if __name__ == '__main__':
 	n_features = X.shape[1]
 	n_neurons = 8
 	n_classes = len(np.unique(y))	
-	learning_rate = 1e-3
+	learning_rate = 1e-4
 	n_epochs = 15
 	train_split = 0.2
 	n_batch = 10 ## In case we use MGD
@@ -46,10 +47,10 @@ if __name__ == '__main__':
 	## Maybe we should go for gradient clipping techniques if it's not a bug
 	model = Sequential()
 	model.add(layer=Linear(n_features, n_neurons), activation="tanh")
-	model.add(layer=Linear(n_neurons, n_neurons), activation="tanh")
+	# model.add(layer=Linear(n_neurons, n_neurons), activation="tanh")
 	model.add(layer=Linear(n_neurons, n_classes), activation="sigmoid")
 	model.compile(loss="sparse_binary_crossentropy", 
-				  optimizer="MGD",
+				  optimizer="SGD",
 				  learning_rate=learning_rate,
 				  metric="accuracy",
 				  n_batch=n_batch, ## If we use MGD
@@ -61,4 +62,4 @@ if __name__ == '__main__':
 			  valid_y, 
 			  n_epochs=n_epochs, 
 			  verbose=True)
-	model.plot_stats()
+	# model.plot_stats()

@@ -91,11 +91,7 @@ class Sequential(Module):
 			self._valid = True
 		else:
 			print("Error : number of arguments in fit()")
-		for cpt_epoch in range(n_epochs):
-			self.optimizer.step(self._X, self._y)
-			self.update_stats()
-			if verbose == True: 
-				self.show_updates(cpt_epoch=cpt_epoch)
+		self.optimizer.step(self._X, self._y, n_epochs, verbose)
 			
 	def predict(self, X):
 		last_module = len(self.network) - 1
