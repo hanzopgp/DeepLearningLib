@@ -2,6 +2,7 @@ from Core import *
 
 # Source: https://peltarion.com/knowledge-center/documentation/modeling-view/build-an-ai-model/loss-functions/categorical-crossentropy
 
+
 class CategoricalCrossEntropy(Loss):
 	def forward(self, y, yhat):
 		assert(y.shape == yhat.shape)

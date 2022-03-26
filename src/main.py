@@ -6,23 +6,28 @@ from utils.utils import *
 import numpy as np
 np.random.seed(42)
 
+
 ## TODOLIST:
 ## Fix gradient exploding (is it a bug or we need gradient clipping)
 ## Enhance loss/metric computation, avoid forward pass somehow
 ## MSGD is not working, don't know how to implement at the moment
-## Make multiclass work (softmax ...)
 ## Try regression
 
 ## * Activation functions:
 ## --> hidden_layer    : relu, sigmoid, softmax, tanh
 ## --> output layer    : sigmoid, softmax
+
 ## * Loss functions:
 ## --> classification  : binary_crossentropy, categorical_crossentropy, sparse_binary_crossentropy, sparse_categorical_crossentropy
+## if the output activation is softmax and we use sparse_categorical_crossentropy then the loss is a SparseCategoricalCrossEntropySoftmax()
 ## --> regression      : mse, mae, rmse
+
 ## * Optimizer functions:
 ## --> basic optimizer : GD, SGD, MGD, MSGD
+
 ## * Score types:
 ## classification score: accuracy
+
 
 if __name__ == '__main__':
 	data_generation = DataGeneration(points=1_000, classes=3)

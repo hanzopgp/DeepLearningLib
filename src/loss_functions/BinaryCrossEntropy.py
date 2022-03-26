@@ -2,6 +2,7 @@ from Core import *
 
 # Source: https://math.stackexchange.com/questions/2503428/derivative-of-binary-cross-entropy-why-are-my-signs-not-right
 
+
 class BinaryCrossEntropy(Loss):
 	def forward(self, y, yhat):
 		assert(y.shape == yhat.shape)

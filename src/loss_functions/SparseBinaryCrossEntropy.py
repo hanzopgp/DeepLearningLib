@@ -3,6 +3,7 @@ from utils.utils import *
 
 # Source: https://math.stackexchange.com/questions/2503428/derivative-of-binary-cross-entropy-why-are-my-signs-not-right
 
+
 class SparseBinaryCrossEntropy(Loss):
 	def forward(self, y, yhat):
 		self._y = one_hot(y, yhat.shape[1])

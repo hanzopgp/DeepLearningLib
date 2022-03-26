@@ -14,6 +14,7 @@ class Linear(Module):
 		self._gradient = np.zeros_like(self._parameters)
 		self._gradient_bias = np.zeros_like(self._bias)
 
+	## Gradient descent with momentum doesn't work at the moment
 	def update_parameters(self, learning_rate, momentum, gamma):
 		if momentum:
 			## Computes weights gradient and update parameters using momentum

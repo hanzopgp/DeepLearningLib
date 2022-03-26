@@ -2,6 +2,7 @@ from Core import *
 
 # Source: https://aimatters.wordpress.com/2019/06/17/the-softmax-function-derivative/
 
+
 class Softmax(Module):
 	def zero_grad(self):
 		pass
