@@ -9,9 +9,10 @@ from loss_functions.MeanSquaredError import MeanSquaredError
 from loss_functions.MeanAbsoluteError import MeanAbsoluteError
 from loss_functions.RootMeanSquaredError import RootMeanSquaredError
 from loss_functions.BinaryCrossEntropy import BinaryCrossEntropy
-from loss_functions.CrossEntropy import CrossEntropy
+from loss_functions.CategoricalCrossEntropy import CategoricalCrossEntropy
 from loss_functions.SparseBinaryCrossEntropy import SparseBinaryCrossEntropy
-from loss_functions.SparseCrossEntropy import SparseCrossEntropy
+from loss_functions.SparseCategoricalCrossEntropy import SparseCategoricalCrossEntropy
+from loss_functions.SparseCategoricalCrossEntropySoftmax import SparseCategoricalCrossEntropySoftmax
 
 from optimizer_functions.GradientDescent import GradientDescent
 from optimizer_functions.StochasticGradientDescent import StochasticGradientDescent
@@ -50,8 +51,8 @@ class Sequential(Module):
 		## Choosing a loss function for our network
 		if loss == "binary_crossentropy":
 			loss_function = BinaryCrossEntropy()
-		elif loss == "crossentropy":
-			loss_function = CrossEntropy()
+		elif loss == "categorical_crossentropy":
+			loss_function = CategoricalCrossEntropy()
 		elif loss == "mse":
 			loss_function = MeanSquaredError()
 		elif loss == "mae":
@@ -60,8 +61,12 @@ class Sequential(Module):
 			loss_function = RootMeanSquaredError()
 		elif loss == "sparse_binary_crossentropy":
 			loss_function = SparseBinaryCrossEntropy()
-		elif loss == "sparse_crossentropy":
-			loss_function = SparseCrossEntropy()
+		elif loss == "sparse_categorical_crossentropy":
+			output_activation = str(type(self.network[len(self.network) - 1]))
+			if "Softmax" in output_activation:
+				loss_function = SparseCategoricalCrossEntropySoftmax()
+			else:
+				loss_function = SparseCategoricalCrossEntropy()
 		else:
 			print("Error : wrong loss function")
 		## Choosing and optimizer function for our network

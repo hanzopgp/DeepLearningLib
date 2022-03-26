@@ -1,12 +1,12 @@
 import numpy as np
 
-def one_hot(y):
+def one_hot(y, n_class):
 	n = y.shape[0]
 	## In case we use stochastic gradient descent
-	if len(np.unique(y)) < 2:
-		n_class = 2
-	else:
-		n_class = len(np.unique(y))
+	# if len(np.unique(y)) < 2:
+	# 	n_class = 2
+	# else:
+	# 	n_class = len(np.unique(y))
 	onehot = np.zeros((n, n_class))
 	onehot[np.arange(n), y] = 1
 	return onehot

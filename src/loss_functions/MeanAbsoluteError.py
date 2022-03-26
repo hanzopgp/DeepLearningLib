@@ -1,5 +1,7 @@
 from Core import *
 
+
+
 class MeanAbsoluteError(Loss):
 	def forward(self, y, yhat):
 		assert(y.shape == yhat.shape)
@@ -8,5 +10,4 @@ class MeanAbsoluteError(Loss):
 		self._output = np.abs(self._y - self._yhat)
 
 	def backward(self):
-		assert(self._y.shape == self._yhat.shape)
 		self._new_delta = np.where(self._yhat > self._y, 1, -1)

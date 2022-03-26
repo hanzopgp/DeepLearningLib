@@ -10,6 +10,8 @@ np.random.seed(42)
 ## Fix gradient exploding (is it a bug or we need gradient clipping)
 ## Enhance loss/metric computation, avoid forward pass somehow
 ## MSGD is not working, don't know how to implement at the moment
+## Make multiclass work (softmax ...)
+## Try regression
 
 ## * Activation functions:
 ## --> hidden_layer    : relu, sigmoid, softmax, tanh
@@ -23,16 +25,16 @@ np.random.seed(42)
 ## classification score: accuracy
 
 if __name__ == '__main__':
-	data_generation = DataGeneration(points=10_000, classes=2)
+	data_generation = DataGeneration(points=1_000, classes=3)
 	data_generation.make_vertical_data()
 	# data_generation.display_data()
 	X, y = data_generation.x, data_generation.y
 
 	n_features = X.shape[1]
-	n_neurons = 8
+	n_neurons = 64
 	n_classes = len(np.unique(y))	
-	learning_rate = 1e-4
-	n_epochs = 15
+	learning_rate = 1e-3
+	n_epochs = 50
 	train_split = 0.2
 	n_batch = 10 ## In case we use MGD
 	gamma = 0.9  ## In case we use MSGD
@@ -48,8 +50,10 @@ if __name__ == '__main__':
 	model = Sequential()
 	model.add(layer=Linear(n_features, n_neurons), activation="tanh")
 	# model.add(layer=Linear(n_neurons, n_neurons), activation="tanh")
-	model.add(layer=Linear(n_neurons, n_classes), activation="sigmoid")
-	model.compile(loss="sparse_binary_crossentropy", 
+	model.add(layer=Linear(n_neurons, n_classes), activation="softmax")
+	model.compile(loss="sparse_categorical_crossentropy", 
+				  #loss="sparse_binary_crossentropy",
+				  #loss="mse",
 				  optimizer="SGD",
 				  learning_rate=learning_rate,
 				  metric="accuracy",

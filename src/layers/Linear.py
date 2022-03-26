@@ -17,13 +17,16 @@ class Linear(Module):
 	def update_parameters(self, learning_rate, momentum, gamma):
 		if momentum:
 			## Computes weights gradient and update parameters using momentum
+			self._value = self._parameters
 			gradient = self._gradient * learning_rate
-			new_value = ((1-gamma) * gradient) + (gamma * self._parameters)
-			self._parameters -= new_value
+			self._new_value = ((1-gamma) * gradient) + (gamma * self._value)
+			self._parameters -= self._new_value
+			self._value = self._new_value
 			## Computes bias gradient and update parameters using momentum
-			gradient_bias = self._gradient_bias * learning_rate
-			new_value = ((1-gamma) * gradient_bias) + (gamma * self._bias)
-			self._bias -= new_value
+			# gradient_bias = self._gradient_bias * learning_rate
+			# self._new_value = ((1-gamma) * gradient_bias) + (gamma * self._bias)
+			# self._bias -= self._new_value
+			self._bias -= self._gradient_bias * learning_rate
 		else:
 			self._parameters -= learning_rate * self._gradient
 			self._bias -= learning_rate * self._gradient_bias
