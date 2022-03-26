@@ -99,12 +99,18 @@ class Sequential(Module):
 		train_acc = self.score(self._X, self._y, type="accuracy")
 		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
 		train_loss = self.network[len(self.network) - 1]._output.mean()
-		print(", train_loss :", '{:<2e}'.format(train_loss), end="")
+		if train_loss < 0:
+			print(", train_loss :", '{:<2e}'.format(train_loss), end="")
+		else:
+			print(", train_loss :", " "+('{:<2e}'.format(train_loss)), end="")
 		if self._valid: 
 			valid_acc = self.score(self._valid_x, self._valid_y, type="accuracy")
 			print(", valid_acc :", '{:<08g}'.format(valid_acc), end="")
 			valid_loss = self.network[len(self.network) - 1]._output.mean()
-			print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
+			if valid_loss < 0: 
+				print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
+			else:
+				print(", valid_loss :", " "+('{:<2e}'.format(valid_loss)), end="")
 		print("")
 
 	def update_stats(self):
