@@ -21,9 +21,13 @@ from optimizer_functions.MinibatchGradientDescent import MinibatchGradientDescen
 class Sequential(Module):
 	def __init__(self):
 		self.network = []
-		self.loss_values = []
-		self.acc_values = []
+		self._train_loss_values = []
+		self._train_acc_values = []
+		self._valid_loss_values = []
+		self._valid_acc_values = []
 		self._valid = False
+
+	############################################### USER FUNCTIONS ###############################################
 
 	def add(self, layer, activation):
 		self.network.append(layer)
@@ -94,63 +98,7 @@ class Sequential(Module):
 			self.network[i].forward(self.network[i-1]._output)
 		return self.network[last_module - 1]._output
 
-	def show_updates(self, cpt_epoch):
-		print("epoch :", cpt_epoch, end="")
-		train_acc = self.score(self._X, self._y, type="accuracy")
-		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
-		train_loss = self.network[len(self.network) - 1]._output.mean()
-		if train_loss < 0:
-			print(", train_loss :", '{:<2e}'.format(train_loss), end="")
-		else:
-			print(", train_loss :", " "+('{:<2e}'.format(train_loss)), end="")
-		if self._valid: 
-			valid_acc = self.score(self._valid_x, self._valid_y, type="accuracy")
-			print(", valid_acc :", '{:<08g}'.format(valid_acc), end="")
-			valid_loss = self.network[len(self.network) - 1]._output.mean()
-			if valid_loss < 0: 
-				print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
-			else:
-				print(", valid_loss :", " "+('{:<2e}'.format(valid_loss)), end="")
-		print("")
-
-	def update_stats(self):
-		self.loss_values.append(self.network[len(self.network) - 1]._output.mean())
-		self.acc_values.append(self.score(self._X, self._y, type="accuracy"))
-
-	def score(self, X, y, type="accuracy"):
-		if type == "accuracy":
-			return np.where(y == self.predict(X).argmax(axis=1), 1, 0).mean()
-
-	def stats(self):
-		lv = np.array(self.loss_values)
-		plt.plot(lv)
-		plt.show()
-		la = np.array(self.acc_values)
-		plt.plot(la)
-		plt.show()
-
-	def summary(self):
-		print("=========================================================================")
-		print("==> Network :")
-		for i, m in enumerate(self.network):
-			type_ = str(type(m))
-			element = type_.split(".")[-1][:-2]
-			if "layers" in type_:
-				print("--> Layer", int(i/2), ":", element, "with parameters_shape =", m._parameters.shape, end="")
-			elif "activation_functions" in type_:
-				print(" and activation :", element)
-			elif "loss_functions" in type_:
-				print("* Loss :", element)
-		print("* Optimizer :", self._optimizer_name)
-		print("* Total number of parameters :", self.count_parameters())
-		print("=========================================================================")
-
-	def count_parameters(self):
-		res = 0
-		for m in self.network:
-			if "layers" in str(type(m)):
-				res += m._parameters.size + m._bias.size
-		return res
+	############################################### LOW LEVEL FUNCTIONS ###############################################
 
 	def zero_grad(self):
 		for m in self.network:
@@ -181,3 +129,84 @@ class Sequential(Module):
 		for i in range(len(self.network) - 1, 0, -1):
 			self.network[i-1].backward_update_gradient(self.network[i]._new_delta)
 			self.network[i-1].backward_delta()
+
+	############################################### DISPLAY FUNCTIONS ###############################################
+
+	def show_updates(self, cpt_epoch):
+		print("epoch :", cpt_epoch, end="")
+		train_loss, train_acc = self.score(self._X, self._y, type="accuracy")
+		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
+		if train_loss < 0:
+			print(", train_loss :", '{:<2e}'.format(train_loss), end="")
+		else:
+			print(", train_loss :", " "+('{:<2e}'.format(train_loss)), end="")
+		if self._valid: 
+			valid_loss, valid_acc = self.score(self._valid_x, self._valid_y, type="accuracy")
+			print(", valid_acc :", '{:<08g}'.format(valid_acc), end="")
+			if valid_loss < 0: 
+				print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
+			else:
+				print(", valid_loss :", " "+('{:<2e}'.format(valid_loss)), end="")
+		print("")
+
+	def update_stats(self):
+		## Updates train tracking
+		loss, acc = self.score(self._X, self._y, type="accuracy")
+		self._train_loss_values.append(loss)
+		self._train_acc_values.append(acc)
+		## Updates valid tracking
+		if self._valid:
+			loss, acc = self.score(self._valid_x, self._valid_y, type="accuracy")
+			self._valid_loss_values.append(loss)
+			self._valid_acc_values.append(acc)
+
+	def score(self, X, y, type="accuracy"):
+		if type == "accuracy":
+			return self.network[len(self.network) - 1]._output.mean(), np.where(y == self.predict(X).argmax(axis=1), 1, 0).mean()
+
+	def plot_stats(self):
+		## Show loss per epochs
+		lv_train = np.array(self._train_loss_values)
+		lv_valid = np.array(self._valid_loss_values)
+		plt.plot(lv_train, label="train")
+		plt.plot(lv_valid, label="valid")
+		plt.legend(loc="upper right")
+		plt.ylabel('Loss')
+		plt.xlabel('Epochs')
+		plt.title("Loss per epochs")
+		plt.show()
+		## Show accuracy per epochs
+		la_train = np.array(self._train_acc_values)
+		la_valid = np.array(self._valid_acc_values)
+		plt.plot(la_train, label="train")
+		plt.plot(la_valid, label="valid")
+		plt.legend(loc="lower right")
+		plt.ylabel('Accuracy')
+		plt.xlabel('Epochs')
+		plt.title("Accuracy per epochs")
+		plt.show()
+
+	def summary(self):
+		print("=========================================================================")
+		print("==> Network :")
+		for i, m in enumerate(self.network):
+			type_ = str(type(m))
+			element = type_.split(".")[-1][:-2]
+			if "layers" in type_:
+				print("--> Layer", int(i/2), ":", element, "with parameters_shape =", m._parameters.shape, end="")
+			elif "activation_functions" in type_:
+				print(" and activation :", element)
+			elif "loss_functions" in type_:
+				print("* Loss :", element)
+		print("* Optimizer :", self._optimizer_name)
+		print("* Total number of parameters :", self.count_parameters())
+		print("=========================================================================")
+
+	############################################### UTILITY FUNCTIONS ###############################################
+
+	def count_parameters(self):
+		res = 0
+		for m in self.network:
+			if "layers" in str(type(m)):
+				res += m._parameters.size + m._bias.size
+		return res

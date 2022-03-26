@@ -6,6 +6,20 @@ from utils.utils import *
 import numpy as np
 np.random.seed(42)
 
+## TODOLIST:
+## Fix gradient exploding
+## Fix loss being the same for train and valid while using score
+
+## * Activation functions:
+## --> hidden_layer    : relu, sigmoid, softmax, tanh
+## --> output layer    : sigmoid, softmax
+## * Loss functions:
+## --> classification  : binary_crossentropy, categorical_crossentropy, sparse_binary_crossentropy, sparse_categorical_crossentropy
+## --> regression      : mse, mae, rmse
+## * Optimizer functions:
+## --> basic optimizer : GD, SGD, MGD
+## * Score types:
+## classification score: accuracy
 
 if __name__ == '__main__':
 	data_generation = DataGeneration(points=10_000, classes=2)
@@ -27,15 +41,15 @@ if __name__ == '__main__':
 	## Gradient exploded when going for GD
 	model = Sequential()
 	model.add(layer=Linear(n_features, n_neurons), activation="tanh")
-	# model.add(layer=Linear(n_neurons, n_neurons), activation="tanh")
 	model.add(layer=Linear(n_neurons, n_classes), activation="sigmoid")
 	model.compile(loss="sparse_binary_crossentropy", 
 				  optimizer="SGD",
 				  learning_rate=learning_rate)
 	model.summary()
-	# model.fit(train_x, train_y, n_epochs=n_epochs, verbose=True)
 	model.fit(train_x, train_y, valid_x, valid_y, n_epochs=n_epochs, verbose=True)
 
-	# model.stats()
-	print("--> Accuracy in train :", model.score(train_x, train_y, type="accuracy"))
-	print("--> Accuracy in test :", model.score(test_x, test_y, type="accuracy"))
+	model.plot_stats()
+	_, train_acc = model.score(train_x, train_y, type="accuracy")
+	_, test_acc = model.score(test_x, test_y, type="accuracy")
+	print("--> Accuracy in train :", train_acc)
+	print("--> Accuracy in test :", test_acc)
