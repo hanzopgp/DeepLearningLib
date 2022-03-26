@@ -7,11 +7,22 @@ import numpy as np
 np.random.seed(42)
 
 
-## TODOLIST:
+## ToDoList:
 ## Fix gradient exploding (is it a bug or we need gradient clipping)
 ## Enhance loss/metric computation, avoid forward pass somehow
 ## MSGD is not working, don't know how to implement at the moment
 ## Try regression
+## Build test package with all the examples that works !!! (one per .py file)
+
+## What currently works:
+## Binary classification on vertical data
+## Multiclass classification on vertical data
+## Regression ???
+## Binary classification on spiral data ???
+## Multiclass classification on spiral data ???
+## Binary classification on real data () ???
+## Multiclass classification on real data (USPS) ???
+
 
 ## * Activation functions:
 ## --> hidden_layer    : relu, sigmoid, softmax, tanh
