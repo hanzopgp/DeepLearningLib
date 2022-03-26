@@ -6,7 +6,7 @@ class Softmax(Module):
 	def zero_grad(self):
 		pass
 
-	def update_parameters(self, learning_rate):
+	def update_parameters(self, learning_rate, momentum, gamma):
 		pass
 	
 	def forward(self, input):
