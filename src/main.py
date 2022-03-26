@@ -1,6 +1,6 @@
 from data.DataGeneration import DataGeneration
 from layers.Linear import Linear
-from module.Sequential import Sequential
+from network.Sequential import Sequential
 from utils.utils import *
 
 import numpy as np
@@ -28,9 +28,9 @@ if __name__ == '__main__':
 	X, y = data_generation.x, data_generation.y
 
 	n_features = X.shape[1]
-	n_neurons = 64 
+	n_neurons = 32 
 	n_classes = len(np.unique(y))	
-	learning_rate = 1e-4
+	learning_rate = 1e-5
 	n_epochs = 10
 	train_split = 0.2
 
@@ -39,17 +39,20 @@ if __name__ == '__main__':
 
 	## Gradient exploded when going for 128 neurons per hidden layer and SGD
 	## Gradient exploded when going for GD
+	## Gradient exploded when going for 2 hidden layers
+	## Going for a lower learning rate fixes the problem but I'm not sure its intended
 	model = Sequential()
 	model.add(layer=Linear(n_features, n_neurons), activation="tanh")
+	# model.add(layer=Linear(n_neurons, n_neurons), activation="tanh")
 	model.add(layer=Linear(n_neurons, n_classes), activation="sigmoid")
 	model.compile(loss="sparse_binary_crossentropy", 
 				  optimizer="SGD",
-				  learning_rate=learning_rate)
+				  learning_rate=learning_rate,
+				  metric="accuracy")
 	model.summary()
 	model.fit(train_x, train_y, valid_x, valid_y, n_epochs=n_epochs, verbose=True)
 
 	model.plot_stats()
-	_, train_acc = model.score(train_x, train_y, type="accuracy")
-	_, test_acc = model.score(test_x, test_y, type="accuracy")
-	print("--> Accuracy in train :", train_acc)
-	print("--> Accuracy in test :", test_acc)
+	# _, train_acc, _, test_acc = model.compute_scores(type="accuracy")
+	# print("--> Accuracy in train :", train_acc)
+	# print("--> Accuracy in test :", test_acc)

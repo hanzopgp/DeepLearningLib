@@ -30,6 +30,8 @@ class Linear(Module):
 		self._gradient += self._input.T @ self._delta 
 		## THERE IS A PROBLEM WHEN USING GRADIENT DESCENT, THERE SHOULD BE A MEAN() OR SUM() SOMEHWERE
 		## BECAUSE GRADIENT IS WAY TOO HIGH WHEN ON WHOLE BATCH
+		# print("INPUT",self._input)
+		# print("DELTA",self._delta)
 		self._gradient_bias += self._delta.sum(axis=0)
 		assert(self._gradient.shape == self._parameters.shape)
 		assert(self._gradient_bias.shape == self._bias.shape)

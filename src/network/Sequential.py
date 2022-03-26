@@ -26,6 +26,7 @@ class Sequential(Module):
 		self._valid_loss_values = []
 		self._valid_acc_values = []
 		self._valid = False
+		self._metric = None
 
 	############################################### USER FUNCTIONS ###############################################
 
@@ -42,7 +43,9 @@ class Sequential(Module):
 		else:
 			print("Error : wrong activation function")
 
-	def compile(self, loss, optimizer, learning_rate):
+	def compile(self, loss, optimizer, learning_rate, metric):
+		## Choosing a metric
+		self._metric = metric
 		## Choosing a loss function for our network
 		if loss == "binary_crossentropy":
 			loss_function = BinaryCrossEntropy()
@@ -134,14 +137,14 @@ class Sequential(Module):
 
 	def show_updates(self, cpt_epoch):
 		print("epoch :", cpt_epoch, end="")
-		train_loss, train_acc = self.score(self._X, self._y, type="accuracy")
+		train_loss, train_acc = self.compute_train_score()
 		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
 		if train_loss < 0:
 			print(", train_loss :", '{:<2e}'.format(train_loss), end="")
 		else:
 			print(", train_loss :", " "+('{:<2e}'.format(train_loss)), end="")
 		if self._valid: 
-			valid_loss, valid_acc = self.score(self._valid_x, self._valid_y, type="accuracy")
+			valid_loss, valid_acc = self.compute_valid_score()
 			print(", valid_acc :", '{:<08g}'.format(valid_acc), end="")
 			if valid_loss < 0: 
 				print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
@@ -151,18 +154,36 @@ class Sequential(Module):
 
 	def update_stats(self):
 		## Updates train tracking
-		loss, acc = self.score(self._X, self._y, type="accuracy")
+		loss, acc = self.compute_train_score()
 		self._train_loss_values.append(loss)
 		self._train_acc_values.append(acc)
 		## Updates valid tracking
 		if self._valid:
-			loss, acc = self.score(self._valid_x, self._valid_y, type="accuracy")
+			loss, acc = self.compute_valid_score()
 			self._valid_loss_values.append(loss)
 			self._valid_acc_values.append(acc)
 
-	def score(self, X, y, type="accuracy"):
-		if type == "accuracy":
-			return self.network[len(self.network) - 1]._output.mean(), np.where(y == self.predict(X).argmax(axis=1), 1, 0).mean()
+	def compute_scores(self):
+		train_loss, train_acc = self.compute_train_score(self, type)
+		if self._valid:
+			valid_loss, valid_acc = self.compute_valid_score(self, type)
+			return train_loss, train_acc, valid_loss, valid_acc
+		return train_loss, train_acc
+
+	def compute_train_score(self):
+		loss = self.network[len(self.network) - 1]._output.mean()
+		if self._metric == "accuracy":
+			acc = np.where(self._y == self.network[len(self.network) - 2]._output.argmax(axis=1), 1, 0).mean()
+		return loss, acc
+
+	def compute_valid_score(self):
+		## Forward pass to update our network with validation data
+		self.forward(self._valid_x, self._valid_y)
+		## Returns the loss and the metrics for the validation data
+		loss = self.network[len(self.network) - 1]._output.mean()
+		if self._metric == "accuracy":
+			acc = np.where(self._valid_y == self.network[len(self.network) - 2]._output.argmax(axis=1), 1, 0).mean()
+		return loss, acc
 
 	def plot_stats(self):
 		## Show loss per epochs

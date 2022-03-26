@@ -22,7 +22,8 @@ class Softmax(Module):
 	def backward_delta(self):
 		input_size = self._input.shape[0]
 		input_vector = self._input.reshape(input_size, 1)
-		input_matrix = np.tile(input_vector, input_size) ## np.tile repeats the <input_vector> array <input_size> times
+		## np.tile repeats the <input_vector> array <input_size> times
+		input_matrix = np.tile(input_vector, input_size) 
 		gradient = np.diag(self._input) - (input_matrix * input_matrix.T)
 		self._new_delta = gradient * self._delta
 

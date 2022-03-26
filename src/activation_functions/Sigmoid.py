@@ -17,6 +17,6 @@ class Sigmoid(Module):
 		self._delta = delta
 
 	def backward_delta(self):
-		exp_ = np.exp(-self._input)
-		gradient = (exp_ / (1 + exp_)**2)
+		sigmoid = 1/(1 + np.exp(-self._input))
+		gradient = sigmoid * (1 - sigmoid)
 		self._new_delta = gradient * self._delta
