@@ -43,7 +43,7 @@ class Sequential(Module):
 		else:
 			print("Error : wrong activation function")
 
-	def compile(self, loss, optimizer, learning_rate, metric):
+	def compile(self, loss, optimizer, learning_rate, metric, n_batch=0):
 		## Choosing a metric
 		self._metric = metric
 		## Choosing a loss function for our network
@@ -70,7 +70,7 @@ class Sequential(Module):
 		elif optimizer == "SGD":
 			self.optimizer = StochasticGradientDescent(self, loss_function, learning_rate)
 		elif optimizer == "MGD":
-			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate)
+			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate, n_batch=n_batch)
 		else:
 			print("Error : wrong optimizer")
 

@@ -28,11 +28,12 @@ if __name__ == '__main__':
 	X, y = data_generation.x, data_generation.y
 
 	n_features = X.shape[1]
-	n_neurons = 4
+	n_neurons = 16
 	n_classes = len(np.unique(y))	
 	learning_rate = 1e-5
 	n_epochs = 50
 	train_split = 0.2
+	n_batch = 10 ## In case we use MGD
 
 	X, valid_x, y, valid_y = split_data(X, y, train_split=train_split, shuffle=True)
 	train_x, test_x, train_y, test_y = split_data(X, y, train_split=train_split, shuffle=True)
@@ -46,9 +47,10 @@ if __name__ == '__main__':
 	# model.add(layer=Linear(n_neurons, n_neurons), activation="tanh")
 	model.add(layer=Linear(n_neurons, n_classes), activation="sigmoid")
 	model.compile(loss="sparse_binary_crossentropy", 
-				  optimizer="SGD",
+				  optimizer="MGD",
 				  learning_rate=learning_rate,
-				  metric="accuracy")
+				  metric="accuracy",
+				  n_batch=n_batch)
 	model.summary()
 	model.fit(train_x, train_y, valid_x, valid_y, n_epochs=n_epochs, verbose=True)
 

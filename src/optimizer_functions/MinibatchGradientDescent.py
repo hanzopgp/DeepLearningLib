@@ -11,8 +11,11 @@ class MinibatchGradientDescent(Optimizer):
 
 	def step(self, X, y):
 		self._net.zero_grad()
-		minibatches_x, minibatches_y = np.array_split(X, self._n_batch), np.array_split(y, self._n_batch)
-		for minibatch_x, minibatch_xy in np.random.choice(zip(minibatches_x, minibatches_y)):
-			self._net.forward(minibatch_x, minibatch_xy)
+		minibatches_x, minibatches_y = np.array(np.array_split(X, self._n_batch)), np.array(np.array_split(y, self._n_batch))
+		n = minibatches_x.shape[0]
+		for _ in range(n):
+			idx = np.random.choice(n)
+			minibatch_x, minibatch_y = minibatches_x[idx], minibatches_y[idx]
+			self._net.forward(minibatch_x, minibatch_y)
 			self._net.backward()
 			self._net.update_parameters(self._learning_rate)
