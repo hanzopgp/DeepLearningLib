@@ -35,6 +35,8 @@ class Sequential(Module):
 			self.network.append(Tanh())
 		elif activation == "softmax":
 			self.network.append(Softmax())
+		else:
+			print("Error : wrong activation function")
 
 	def compile(self, loss, optimizer, learning_rate):
 		## Choosing a loss function for our network
@@ -52,6 +54,8 @@ class Sequential(Module):
 			loss_function = SparseBinaryCrossEntropy()
 		elif loss == "sparse_crossentropy":
 			loss_function = SparseCrossEntropy()
+		else:
+			print("Error : wrong loss function")
 		## Choosing and optimizer function for our network
 		self._optimizer_name = optimizer
 		if optimizer == "GD":
@@ -60,11 +64,15 @@ class Sequential(Module):
 			self.optimizer = StochasticGradientDescent(self, loss_function, learning_rate)
 		elif optimizer == "MGD":
 			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate)
+		else:
+			print("Error : wrong optimizer")
 
-	def fit(self, *arg, n_epochs):
+	def fit(self, *arg, n_epochs, verbose):
+		## If there is just a train set
 		if len(arg) == 2:
 			self._X = arg[0]
 			self._y = arg[1]
+		## If there is a train set and a valid set
 		elif len(arg) == 4:
 			self._X = arg[0]
 			self._y = arg[1]
@@ -73,10 +81,11 @@ class Sequential(Module):
 			self._valid = True
 		else:
 			print("Error : number of arguments in fit()")
-		for _ in range(n_epochs):
+		for cpt_epoch in range(n_epochs):
 			self.optimizer.step(self._X, self._y)
 			self.update_stats()
-			self.show_updates(valid=self._valid)
+			if verbose == True: 
+				self.show_updates(cpt_epoch=cpt_epoch)
 			
 	def predict(self, X):
 		last_module = len(self.network) - 1
@@ -85,13 +94,21 @@ class Sequential(Module):
 			self.network[i].forward(self.network[i-1]._output)
 		return self.network[last_module - 1]._output
 
-	def show_updates(self, valid):
-		print(self.score(self._X, self._y, type="accuracy"))
-		if valid: print(self.score(self._valid_x, self._valid_y, type="accuracy"))
+	def show_updates(self, cpt_epoch):
+		print("epoch :", cpt_epoch, end="")
+		train_acc = self.score(self._X, self._y, type="accuracy")
+		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
+		train_loss = self.network[len(self.network) - 1]._output.mean()
+		print(", train_loss :", '{:<2e}'.format(train_loss), end="")
+		if self._valid: 
+			valid_acc = self.score(self._valid_x, self._valid_y, type="accuracy")
+			print(", valid_acc :", '{:<08g}'.format(valid_acc), end="")
+			valid_loss = self.network[len(self.network) - 1]._output.mean()
+			print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
+		print("")
 
 	def update_stats(self):
-		last_module = len(self.network) - 1
-		self.loss_values.append(self.network[last_module]._output.mean())
+		self.loss_values.append(self.network[len(self.network) - 1]._output.mean())
 		self.acc_values.append(self.score(self._X, self._y, type="accuracy"))
 
 	def score(self, X, y, type="accuracy"):

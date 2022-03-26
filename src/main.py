@@ -8,7 +8,7 @@ np.random.seed(42)
 
 
 if __name__ == '__main__':
-	data_generation = DataGeneration(points=3000, classes=2)
+	data_generation = DataGeneration(points=10_000, classes=2)
 	data_generation.make_vertical_data()
 	# data_generation.display_data()
 	X, y = data_generation.x, data_generation.y
@@ -33,9 +33,9 @@ if __name__ == '__main__':
 				  optimizer="SGD",
 				  learning_rate=learning_rate)
 	model.summary()
-	model.fit(train_x, train_y, n_epochs=n_epochs)
-	# model.fit(train_x, train_y, valid_x, valid_y n_epochs=n_epochs)
+	# model.fit(train_x, train_y, n_epochs=n_epochs, verbose=True)
+	model.fit(train_x, train_y, valid_x, valid_y, n_epochs=n_epochs, verbose=True)
 
-	model.stats()
+	# model.stats()
 	print("--> Accuracy in train :", model.score(train_x, train_y, type="accuracy"))
 	print("--> Accuracy in test :", model.score(test_x, test_y, type="accuracy"))
