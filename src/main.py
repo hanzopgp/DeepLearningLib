@@ -28,10 +28,10 @@ if __name__ == '__main__':
 	X, y = data_generation.x, data_generation.y
 
 	n_features = X.shape[1]
-	n_neurons = 32 
+	n_neurons = 4
 	n_classes = len(np.unique(y))	
 	learning_rate = 1e-5
-	n_epochs = 10
+	n_epochs = 50
 	train_split = 0.2
 
 	X, valid_x, y, valid_y = split_data(X, y, train_split=train_split, shuffle=True)

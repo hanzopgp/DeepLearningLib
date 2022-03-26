@@ -136,7 +136,7 @@ class Sequential(Module):
 	############################################### DISPLAY FUNCTIONS ###############################################
 
 	def show_updates(self, cpt_epoch):
-		print("epoch :", cpt_epoch, end="")
+		print("epoch :", '{:>03g}'.format(cpt_epoch), end="")
 		train_loss, train_acc = self.compute_train_score()
 		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
 		if train_loss < 0:
@@ -171,6 +171,9 @@ class Sequential(Module):
 		return train_loss, train_acc
 
 	def compute_train_score(self):
+		## Forward pass to update our network with train data
+		self.forward(self._X, self._y)
+		## Returns the loss and the metrics for the training data
 		loss = self.network[len(self.network) - 1]._output.mean()
 		if self._metric == "accuracy":
 			acc = np.where(self._y == self.network[len(self.network) - 2]._output.argmax(axis=1), 1, 0).mean()
@@ -178,6 +181,7 @@ class Sequential(Module):
 
 	def compute_valid_score(self):
 		## Forward pass to update our network with validation data
+		## But we don't update parameters since its not our training data
 		self.forward(self._valid_x, self._valid_y)
 		## Returns the loss and the metrics for the validation data
 		loss = self.network[len(self.network) - 1]._output.mean()
