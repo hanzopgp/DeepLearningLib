@@ -45,7 +45,7 @@ class Sequential(Module):
 		else:
 			print("Error : wrong activation function")
 
-	def compile(self, loss, optimizer, learning_rate, metric, n_batch=0, gamma=None):
+	def compile(self, loss, optimizer, learning_rate, metric, n_batch=0):
 		## Choosing a metric
 		self._metric = metric
 		## Choosing a loss function for our network
@@ -77,8 +77,6 @@ class Sequential(Module):
 			self.optimizer = StochasticGradientDescent(self, loss_function, learning_rate)
 		elif optimizer == "MGD":
 			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate, n_batch=n_batch)
-		elif optimizer == "MSGD":
-			self.optimizer = MomentumStochasticGradientDescent(self, loss_function, learning_rate, gamma)
 		else:
 			print("Error : wrong optimizer")
 
@@ -124,9 +122,9 @@ class Sequential(Module):
 		## Return the output of the last layer, before the loss module
 		return self.network[last_module - 1]._output
 
-	def update_parameters(self, learning_rate, momentum=False, gamma=None):
+	def update_parameters(self, learning_rate):
 		for i in range(len(self.network) - 1):
-			self.network[i].update_parameters(learning_rate, momentum, gamma)
+			self.network[i].update_parameters(learning_rate)
 
 	def backward(self):
 		loss_function = self.network[len(self.network) - 1]

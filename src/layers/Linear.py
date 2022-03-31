@@ -14,23 +14,9 @@ class Linear(Module):
 		self._gradient = np.zeros_like(self._parameters)
 		self._gradient_bias = np.zeros_like(self._bias)
 
-	## Gradient descent with momentum doesn't work at the moment
-	def update_parameters(self, learning_rate, momentum, gamma):
-		if momentum:
-			## Computes weights gradient and update parameters using momentum
-			self._value = self._parameters
-			gradient = self._gradient * learning_rate
-			self._new_value = ((1-gamma) * gradient) + (gamma * self._value)
-			self._parameters -= self._new_value
-			self._value = self._new_value
-			## Computes bias gradient and update parameters using momentum
-			# gradient_bias = self._gradient_bias * learning_rate
-			# self._new_value = ((1-gamma) * gradient_bias) + (gamma * self._bias)
-			# self._bias -= self._new_value
-			self._bias -= self._gradient_bias * learning_rate
-		else:
-			self._parameters -= learning_rate * self._gradient
-			self._bias -= learning_rate * self._gradient_bias
+	def update_parameters(self, learning_rate):
+		self._parameters -= learning_rate * self._gradient
+		self._bias -= learning_rate * self._gradient_bias
 
 	def forward(self, input):
 		assert(input.shape[1] == self._parameters.shape[0])

@@ -20,7 +20,6 @@ from loss_functions.SparseCategoricalCrossEntropySoftmax import SparseCategorica
 from optimizer_functions.GradientDescent import GradientDescent
 from optimizer_functions.StochasticGradientDescent import StochasticGradientDescent
 from optimizer_functions.MinibatchGradientDescent import MinibatchGradientDescent
-from optimizer_functions.MomentumStochasticGradientDescent import MomentumStochasticGradientDescent
 
 from layers.Linear import Linear
 from network.Sequential import Sequential

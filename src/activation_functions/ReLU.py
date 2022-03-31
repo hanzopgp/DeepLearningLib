@@ -5,7 +5,7 @@ class ReLU(Module):
 	def zero_grad(self):
 		pass
 	
-	def update_parameters(self, learning_rate, momentum, gamma):
+	def update_parameters(self, learning_rate):
 		pass
 
 	def forward(self, input):
