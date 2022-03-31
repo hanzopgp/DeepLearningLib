@@ -1,7 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
-import random
-
 
 class Optimizer():
 	def __init__(self):

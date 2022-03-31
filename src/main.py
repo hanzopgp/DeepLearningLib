@@ -1,9 +1,10 @@
-from data.DataGeneration import DataGeneration
-from layers.Linear import Linear
-from network.Sequential import Sequential
+# from data.DataGeneration import DataGeneration
+# from layers.Linear import Linear
+# from network.Sequential import Sequential
+from global_imports import *
 from utils.utils import *
 
-import numpy as np
+# import numpy as np
 np.random.seed(42)
 
 

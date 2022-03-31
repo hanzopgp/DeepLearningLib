@@ -1,5 +1,5 @@
 from Core import *
-from utils.utils import *
+from utils.utils import one_hot
 
 # Source: https://math.stackexchange.com/questions/2503428/derivative-of-binary-cross-entropy-why-are-my-signs-not-right
 

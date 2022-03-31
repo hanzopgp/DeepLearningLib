@@ -1,5 +1,5 @@
 from Core import *
-from utils.utils import *
+from utils.utils import one_hot
 
 # Source: https://peltarion.com/knowledge-center/documentation/modeling-view/build-an-ai-model/loss-functions/categorical-crossentropy
 

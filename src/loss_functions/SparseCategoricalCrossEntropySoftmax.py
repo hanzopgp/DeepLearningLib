@@ -1,5 +1,5 @@
 from Core import *
-from utils.utils import *
+from utils.utils import one_hot
 
 
 class SparseCategoricalCrossEntropySoftmax(Loss):
