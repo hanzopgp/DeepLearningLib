@@ -9,7 +9,6 @@ np.random.seed(42)
 
 
 ## ToDoList:
-## Fix gradient exploding (is it a bug or we need gradient clipping)
 ## Enhance loss/metric computation, avoid forward pass somehow
 ## Try regression
 ## Build test package with all the examples that works !!! (one per .py file)
@@ -41,38 +40,37 @@ np.random.seed(42)
 
 
 if __name__ == '__main__':
-	data_generation = DataGeneration(points=1_000, classes=3)
-	data_generation.make_vertical_data()
+	data_generation = DataGeneration(points=200, classes=3)
+	data_generation.make_spiral_data()
 	# data_generation.display_data()
 	X, y = data_generation.x, data_generation.y
 
 	n_features = X.shape[1]
-	n_neurons = 16
+	n_neurons = 32
 	n_classes = len(np.unique(y))	
 	learning_rate = 1e-3
-	n_epochs = 50
+	n_epochs = 500
 	train_split = 0.2
 	n_batch = 10 ## In case we use MGD
+	decay = 1e-6
+	init_type = "xavier"
 
 	X, valid_x, y, valid_y = split_data(X, y, train_split=train_split, shuffle=True)
 	train_x, test_x, train_y, test_y = split_data(X, y, train_split=train_split, shuffle=True)
 
-	## Gradient exploded when going for 128 neurons per hidden layer and SGD
-	## Gradient exploded when going for GD
-	## Gradient exploded when going for 2 hidden layers
-	## Going for a lower learning rate fixes the problem but I'm not sure its intended
-	## Maybe we should go for gradient clipping techniques if it's not a bug
 	model = Sequential()
-	model.add(layer=Linear(n_features, n_neurons), activation="tanh")
-	model.add(layer=Linear(n_neurons, n_neurons), activation="tanh")
-	model.add(layer=Linear(n_neurons, n_classes), activation="softmax")
+	model.add(layer=Linear(n_features, n_neurons, init_type=init_type), activation="tanh")
+	model.add(layer=Linear(n_neurons, n_neurons, init_type=init_type), activation="tanh")
+	model.add(layer=Linear(n_neurons, n_neurons, init_type=init_type), activation="tanh")
+	model.add(layer=Linear(n_neurons, n_classes, init_type=init_type), activation="softmax")
 	model.compile(loss="sparse_categorical_crossentropy", 
 				  #loss="sparse_binary_crossentropy",
 				  #loss="mse",
 				  optimizer="SGD",
 				  learning_rate=learning_rate,
 				  metric="accuracy",
-				  n_batch=n_batch) ## If we use MGD
+				  n_batch=n_batch, ## If we use MGD
+				  decay=decay)
 	model.summary()
 	model.fit(train_x, 
 			  train_y, 
@@ -80,4 +78,4 @@ if __name__ == '__main__':
 			  valid_y, 
 			  n_epochs=n_epochs, 
 			  verbose=True)
-	# model.plot_stats()
+	model.plot_stats()

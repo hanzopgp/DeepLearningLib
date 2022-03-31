@@ -4,10 +4,14 @@ from Core import *
 
 
 class Linear(Module):
-	def __init__(self, size_in, size_out):
+	def __init__(self, size_in, size_out, init_type="xavier"):
 		super().__init__()
-		self._parameters = np.random.rand(size_in, size_out)
-		self._bias = np.random.rand(size_out)
+		norm = np.sqrt(size_out)
+		if init_type == "xavier":
+			self._parameters = (np.random.rand(size_in, size_out) * 2 - 1) / norm
+		else:
+			self._parameters = np.random.rand(size_in, size_out) * 1e-3
+		self._bias = np.zeros(size_out)
 		self.zero_grad()
 
 	def zero_grad(self):
