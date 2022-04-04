@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 import tensorflow as tf
 from tqdm import tqdm
 
+import global_variables
+
 from data.DataGeneration import DataGeneration
 
 from activation_functions.ReLU import ReLU

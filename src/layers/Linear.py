@@ -1,4 +1,5 @@
 from Core import *
+from global_imports import *
 
 # Source: https://web.eecs.umich.edu/~justincj/teaching/eecs442/notes/linear-backprop.html
 
@@ -9,7 +10,7 @@ class Linear(Module):
 		if init_type == "xavier":
 			self._parameters = (np.random.rand(size_in, size_out) * 2 - 1) / np.sqrt(size_out)
 		else:
-			self._parameters = np.random.rand(size_in, size_out) * 1e-3
+			self._parameters = np.random.rand(size_in, size_out) * global_variables.PARAMETERS_INIT_FACTOR
 		self._bias = np.zeros(size_out)
 		self.zero_grad()
 

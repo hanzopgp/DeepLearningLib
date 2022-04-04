@@ -52,7 +52,6 @@ class Sequential(Module):
 		else:
 			print("Error : wrong loss function")
 		## Choosing and optimizer function for our network
-		self._optimizer_name = optimizer
 		if optimizer == "GD":
 			self.optimizer = GradientDescent(self, loss_function, learning_rate)
 		elif optimizer == "SGD":
@@ -119,7 +118,7 @@ class Sequential(Module):
 
 	############################################### DISPLAY FUNCTIONS ###############################################
 
-	def show_updates(self, cpt_epoch):
+	def show_updates(self, cpt_epoch, learning_rate):
 		print("epoch :", '{:>03g}'.format(cpt_epoch), end="")
 		train_loss, train_acc = self.compute_train_score()
 		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
@@ -134,6 +133,7 @@ class Sequential(Module):
 				print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
 			else:
 				print(", valid_loss :", " "+('{:<2e}'.format(valid_loss)), end="")
+		print(", learning_rate :", '{:<2e}'.format(learning_rate), end="")
 		print("")
 
 	def update_stats(self):
@@ -207,7 +207,7 @@ class Sequential(Module):
 				print(" and activation :", element)
 			elif "loss_functions" in type_:
 				print("* Loss :", element)
-		print("* Optimizer :", self._optimizer_name)
+		print("* Optimizer :", str(type(self.optimizer)).split(".")[-1][:-2])
 		print("* Total number of parameters :", self.count_parameters())
 		print("====================================================================================")
 

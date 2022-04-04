@@ -4,23 +4,22 @@ from utils.utils import *
 
 def mnist_classification_mlp():
 	## Loading fashion MNIST dataset
-	dataset_size = 5_000
 	fashion_mnist = tf.keras.datasets.fashion_mnist                            
-	(X, y), (X_test, y_test) = fashion_mnist.load_data()[:dataset_size]
+	(X, y), (X_test, y_test) = fashion_mnist.load_data()
 	## Reshaping to get linear data in order to use our feed forward model
 	X = X.reshape(X.shape[0], -1)
 	X_test = X_test.reshape(X_test.shape[0], -1)
 	## Normalizing our data
-	X = min_max_scaler(X, -1, 1)
-	X_test = min_max_scaler(X_test, -1, 1)
+	X = min_max_scaler(X, 0, 1)
+	X_test = min_max_scaler(X_test, 0, 1)
 	## Main variables
 	n_features = X.shape[1]
 	n_classes = len(np.unique(y))	
-	learning_rate = 1e-5
-	n_epochs = 10
-	train_split = 0.8
-	decay = 1e-6
 	init_type = "xavier"
+	learning_rate = 1e-5
+	decay = 1e-10
+	n_epochs = 50
+	train_split = 0.8
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
 
