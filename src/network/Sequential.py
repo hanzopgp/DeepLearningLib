@@ -106,6 +106,7 @@ class Sequential(Module):
 	def update_parameters(self, learning_rate):
 		for i in range(len(self.network) - 1):
 			self.network[i].update_parameters(learning_rate)
+			self.network[i].zero_grad()
 
 	def backward(self):
 		loss_function = self.network[len(self.network) - 1]

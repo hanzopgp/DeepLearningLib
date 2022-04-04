@@ -16,13 +16,12 @@ def mnist_classification_mlp():
 	n_features = X.shape[1]
 	n_classes = len(np.unique(y))	
 	init_type = "xavier"
-	learning_rate = 1e-5
+	learning_rate = 1e-2
 	decay = 1e-10
-	n_epochs = 50
+	n_epochs = 10
 	train_split = 0.8
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
-
 
 	# model = tf.keras.models.Sequential()
 	# model.add(tf.keras.layers.Dense(256, activation="tanh")) 

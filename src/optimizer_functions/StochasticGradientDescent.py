@@ -13,7 +13,6 @@ class StochasticGradientDescent(Optimizer):
 	def step(self, X, y, n_epochs, verbose):
 		n = X.shape[0]
 		for cpt_epoch in range(n_epochs):
-			self._net.zero_grad()
 			for _ in tqdm(range(n)):
 				idx = np.random.choice(n)
 				x_element, y_element = X[idx].reshape(1, -1), y[idx].reshape(1, -1)

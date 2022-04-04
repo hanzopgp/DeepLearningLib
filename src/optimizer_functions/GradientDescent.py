@@ -11,10 +11,9 @@ class GradientDescent(Optimizer):
 
 	def step(self, X, y, n_epochs, verbose):
 		for cpt_epoch in range(n_epochs):
-			self._net.zero_grad()
 			self._net.forward(X, y)
 			self._net.backward()
 			self._net.update_parameters(self._learning_rate)
 			self._net.update_stats()
 			if verbose == True: 
-				self._net.show_updates(cpt_epoch=cpt_epoch)
+				self._net.show_updates(cpt_epoch, self._learning_rate)
