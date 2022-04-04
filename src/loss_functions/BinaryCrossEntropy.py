@@ -5,7 +5,7 @@ from Core import *
 
 class BinaryCrossEntropy(Loss):
 	def forward(self, y, yhat):
-		assert(y.shape == yhat.shape)
+		# assert(y.shape == yhat.shape)
 		self._y = y
 		self._yhat = yhat
 		eps = 1e-100

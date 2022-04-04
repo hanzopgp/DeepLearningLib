@@ -17,6 +17,9 @@ class DataGeneration:
 			plt.scatter(self.x, self.y, marker='.')
 			plt.show()
 
+	def get_data(self):
+		return self.x, self.y
+
 
 class ContinuousGen(DataGeneration):
 	def __init__(self, nb_points=1000, eps=0.1, sigma=0.1):
