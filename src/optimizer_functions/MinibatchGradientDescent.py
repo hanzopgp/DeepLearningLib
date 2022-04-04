@@ -1,4 +1,5 @@
 from Core import *
+from global_imports import *
 
 
 class MinibatchGradientDescent(Optimizer):
@@ -14,7 +15,7 @@ class MinibatchGradientDescent(Optimizer):
 		n = minibatches_x.shape[0]
 		for cpt_epoch in range(n_epochs):
 			self._net.zero_grad()
-			for _ in range(n):
+			for _ in tqdm(range(n)):
 				idx = np.random.choice(n)
 				minibatch_x, minibatch_y = minibatches_x[idx], minibatches_y[idx]
 				self._net.forward(minibatch_x, minibatch_y)

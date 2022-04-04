@@ -196,7 +196,7 @@ class Sequential(Module):
 		plt.show()
 
 	def summary(self):
-		print("=========================================================================")
+		print("====================================================================================")
 		print("==> Network :")
 		for i, m in enumerate(self.network):
 			type_ = str(type(m))
@@ -209,7 +209,7 @@ class Sequential(Module):
 				print("* Loss :", element)
 		print("* Optimizer :", self._optimizer_name)
 		print("* Total number of parameters :", self.count_parameters())
-		print("=========================================================================")
+		print("====================================================================================")
 
 	############################################### UTILITY FUNCTIONS ###############################################
 

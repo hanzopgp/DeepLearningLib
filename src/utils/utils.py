@@ -15,3 +15,9 @@ def split_data(X, y, train_split=0.2, shuffle=True):
 		X, y = X[idx], y[idx]
 	split = int(X.shape[0]*train_split)
 	return X[:split], X[split:], y[:split], y[split:]
+
+def min_max_scaler(X, min_input, max_input):
+	max_ = X.max(axis=0)
+	min_ = X.min(axis=0)
+	std_ = (X - min_) / (max_ - min_)
+	return std_ * (max_input - min_input) + min_input

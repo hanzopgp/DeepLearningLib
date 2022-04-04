@@ -11,6 +11,7 @@ class Softmax(Module):
 		pass
 	
 	def forward(self, input):
+		input = input - input.max(axis=1, keepdims=True) ## Fixes overflow issue in exp()
 		self._input = input
 		exp_ = np.exp(self._input)
 		self._output = exp_ / np.sum(exp_, axis=1).reshape(-1, 1)

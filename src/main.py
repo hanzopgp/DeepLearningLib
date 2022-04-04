@@ -4,23 +4,26 @@
 from global_imports import *
 from utils.utils import *
 
-# import numpy as np
-np.random.seed(42)
-
 
 ## ToDoList:
 ## Enhance loss/metric computation, avoid forward pass somehow
-## Try regression
-## Build test package with all the examples that works !!! (one per .py file)
+## AutoEncoders (bonus : sharing weight matrixes)
+## CNN
 
 ## What currently works:
-## Binary classification on vertical data
-## Multiclass classification on vertical data
+## Binary classification on vertical data OK
+## Multiclass classification on vertical data OK
 ## Regression ???
 ## Binary classification on spiral data ???
 ## Multiclass classification on spiral data ???
-## Binary classification on real data () ???
+## Binary classification on real data ???
 ## Multiclass classification on real data (USPS) ???
+
+# AutoEncoders ideas: (need to implement at least one and study it)
+## Image reconstruction with AutoEncoders ???
+## Represent 2D/3D latent space (bonus : MD latent space with T-sne) ???
+## Using AutoEncoders on noisy data and observing errors ???
+## Classification using latent space given by AutoEncoders ???
 
 
 ## * Activation functions:
