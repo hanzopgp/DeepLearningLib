@@ -12,7 +12,6 @@ def classif_score(
 	Y: np.ndarray
 	):
 	predictions = np.argmax(Y_hat, axis=1).reshape(-1, 1)
-	print(predictions.shape, Y.shape)
 	return np.sum(predictions == Y) / Y.shape[0]
 
 def mse_score(
@@ -71,12 +70,12 @@ if __name__ == '__main__':
 			(Linear(2, 4), "tanh")
 		],
 		model_kwargs=None,
-		compile_kwargs={
-			"loss": "sparse_categorical_crossentropy",
-			"optimizer": "SGD",
-			"learning_rate": 1e-3,
-			"metric": "accuracy"
-		},
+		compile_kwargs=dict(
+			loss="sparse_categorical_crossentropy",
+			optimizer="GD",
+			learning_rate=1e-3,
+			metric="accuracy"
+		),
 		fit_kwargs=dict(
 			n_epochs=10,
 			verbose=False
