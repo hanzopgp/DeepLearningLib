@@ -46,7 +46,8 @@ class StochasticGradientDescent(Optimizer):
 			## Early stopping part
 			if early_stopping is not None:
 				if early_stopping["metric"] == "valid_loss":
-					if (valid_loss + early_stopping["min_delta"]) < best_valid_loss:
+					## np.abs() for distance to 0 in case we use BCE loss for example which can give negativ losses
+					if np.abs(valid_loss + early_stopping["min_delta"]) < np.abs(best_valid_loss):
 						best_cpt_epoch = cpt_epoch
 						best_valid_loss = valid_loss
 						best_model = self._net
@@ -58,7 +59,7 @@ class StochasticGradientDescent(Optimizer):
 							print("--> Early stopping triggered and best model returned from epoch number", best_cpt_epoch)
 							break
 				elif early_stopping["metric"] == "train_loss":
-					if (train_loss + early_stopping["min_delta"]) < best_train_loss:
+					if np.abs(train_loss + early_stopping["min_delta"]) < np.abs(best_train_loss):
 						best_cpt_epoch = cpt_epoch
 						best_train_loss = train_loss
 						best_model = self._net
