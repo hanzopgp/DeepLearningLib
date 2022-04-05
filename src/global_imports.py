@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from data.DataGeneration import ContinuousGen, MultiClassGen, TwoClassGen
+from data.DataGeneration import DataGeneration, ContinuousGen, MultiClassGen, TwoClassGen
 
 from activation_functions.ReLU import ReLU
 from activation_functions.Sigmoid import Sigmoid
