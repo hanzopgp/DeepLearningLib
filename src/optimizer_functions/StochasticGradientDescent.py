@@ -1,3 +1,4 @@
+from re import A
 from Core import *
 from global_imports import *
 
@@ -10,21 +11,87 @@ class StochasticGradientDescent(Optimizer):
 		self._learning_rate = learning_rate
 		self._decay = decay
 
-	def step(self, X, y, n_epochs, verbose):
+	def step(self, X, y, n_epochs, verbose, early_stopping):
+		## Variables for early stopping
+		if early_stopping is not None:
+			best_cpt_epoch = 0
+			best_model = self._net
+			best_valid_loss = np.inf
+			best_train_loss = np.inf
+			best_valid_acc = 0
+			best_train_acc = 0
+			cpt_patience = 0
+
+		## Epoch loop : one epoch means we trained on the whole dataset
 		n = X.shape[0]
 		for cpt_epoch in range(n_epochs):
+			## Stochastic gradient descent
 			for _ in tqdm(range(n)):
 				idx = np.random.choice(n)
 				x_element, y_element = X[idx].reshape(1, -1), y[idx].reshape(1, -1)
 				self._net.forward(x_element, y_element)
 				self._net.backward()
 				self._net.update_parameters(self._learning_rate)
+
+			## Learning rate computation with decay with respect to cpt_epoch
 			self._learning_rate  *= (1. / (1. + self._decay * cpt_epoch))
-			self._net.update_stats()
+
+			## Updating the model stats
+			train_loss, train_acc, valid_loss, valid_acc = self._net.update_stats()
+
+			## Displaying the metrics, cpt_epoch...
 			if verbose == True: 
 				self._net.show_updates(cpt_epoch, self._learning_rate)
 
-
-
+			## Early stopping part
+			if early_stopping is not None:
+				if early_stopping["metric"] == "valid_loss":
+					if (valid_loss + early_stopping["min_delta"]) < best_valid_loss:
+						best_cpt_epoch = cpt_epoch
+						best_valid_loss = valid_loss
+						best_model = self._net
+						cpt_patience = 0
+					else:
+						cpt_patience += 1
+						if cpt_patience >= early_stopping["patience"]:
+							self._net = best_model
+							print("--> Early stopping triggered and best model returned from epoch number", best_cpt_epoch)
+							break
+				elif early_stopping["metric"] == "train_loss":
+					if (train_loss + early_stopping["min_delta"]) < best_train_loss:
+						best_cpt_epoch = cpt_epoch
+						best_train_loss = train_loss
+						best_model = self._net
+						cpt_patience = 0
+					else:
+						cpt_patience += 1
+						if cpt_patience >= early_stopping["patience"]:
+							self._net = best_model
+							print("--> Early stopping triggered and best model returned from epoch number", best_cpt_epoch)
+							break
+				elif early_stopping["metric"] == "valid_accuracy":
+					if (valid_acc - early_stopping["min_delta"]) > best_valid_acc:
+						best_cpt_epoch = cpt_epoch
+						best_valid_acc = valid_acc
+						best_model = self._net
+						cpt_patience = 0
+					else:
+						cpt_patience += 1
+						if cpt_patience >= early_stopping["patience"]:
+							self._net = best_model
+							print("--> Early stopping triggered and best model returned from epoch number", best_cpt_epoch)
+							break
+				elif early_stopping["metric"] == "train_accuracy":
+					if (train_acc - early_stopping["min_delta"]) > best_train_acc:
+						best_cpt_epoch = cpt_epoch
+						best_train_acc = train_acc
+						best_model = self._net
+						cpt_patience = 0
+					else:
+						cpt_patience += 1
+						if cpt_patience >= early_stopping["patience"]:
+							self._net = best_model
+							print("--> Early stopping triggered and best model saved from epoch number", best_cpt_epoch)
+							break
 		
 		

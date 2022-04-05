@@ -61,7 +61,7 @@ class Sequential(Module):
 		else:
 			print("Error : wrong optimizer")
 
-	def fit(self, *arg, n_epochs, verbose):
+	def fit(self, *arg, n_epochs, verbose=True, early_stopping=None):
 		## If there is just a train set
 		if len(arg) == 2:
 			self._X = arg[0]
@@ -75,7 +75,7 @@ class Sequential(Module):
 			self._valid = True
 		else:
 			print("Error : number of arguments in fit()")
-		self.optimizer.step(self._X, self._y, n_epochs, verbose)
+		self.optimizer.step(self._X, self._y, n_epochs, verbose, early_stopping)
 			
 	def predict(self, X):
 		last_module = len(self.network) - 1
@@ -139,14 +139,16 @@ class Sequential(Module):
 
 	def update_stats(self):
 		## Updates train tracking
-		loss, acc = self.compute_train_score()
-		self._train_loss_values.append(loss)
-		self._train_acc_values.append(acc)
+		train_loss, train_acc = self.compute_train_score()
+		self._train_loss_values.append(train_loss)
+		self._train_acc_values.append(train_acc)
 		## Updates valid tracking
 		if self._valid:
-			loss, acc = self.compute_valid_score()
-			self._valid_loss_values.append(loss)
-			self._valid_acc_values.append(acc)
+			valid_loss, valid_acc = self.compute_valid_score()
+			self._valid_loss_values.append(valid_loss)
+			self._valid_acc_values.append(valid_acc)
+			return train_loss, train_acc, valid_loss, valid_acc
+		return train_loss, train_acc
 
 	def compute_scores(self):
 		train_loss, train_acc = self.compute_train_score(self, type)

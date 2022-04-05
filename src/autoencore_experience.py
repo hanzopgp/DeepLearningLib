@@ -17,14 +17,15 @@ def mnist_classification_mlp():
 	n_classes = len(np.unique(y))	
 	init_type = "xavier"
 	learning_rate = 1e-2
-	decay = 1e-2
+	decay = 1e-3
 	regularization_lambda = 1e-6 ## L2 regularization
-	n_epochs = 30
+	n_epochs = 100
 	train_split = 0.8
+	early_stopping = {"patience": 10, "metric": "valid_accuracy", "min_delta": 0.001}
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
-	size = 5_000
-	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
+	# size = 2_000
+	# X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 
 	# model = tf.keras.models.Sequential()
 	# model.add(tf.keras.layers.Dense(256, activation="tanh")) 
@@ -62,7 +63,8 @@ def mnist_classification_mlp():
 			  X_valid, 
 			  y_valid, 
 			  n_epochs=n_epochs, 
-			  verbose=True)
+			  verbose=True,
+			  early_stopping=early_stopping)
 	model.plot_stats()
 
 
