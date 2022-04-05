@@ -27,7 +27,7 @@ class Sequential(Module):
 		else:
 			print("Error : wrong activation function")
 
-	def compile(self, loss, optimizer, learning_rate, metric, n_batch=0, decay=1e-6):
+	def compile(self, loss, optimizer="sgd", learning_rate=1e-3, metric=None, n_batch=0, decay=1e-6):
 		## Choosing a metric
 		self._metric = metric
 		## Choosing a loss function for our network
@@ -50,19 +50,18 @@ class Sequential(Module):
 			else:
 				loss_function = SparseCategoricalCrossEntropy()
 		else:
-			print("Error : wrong loss function")
+			print("Error : wrong loss function")		######## throw error here instead of printing
 		## Choosing and optimizer function for our network
-		self._optimizer_name = optimizer
-		if optimizer == "GD":
+		if optimizer == "gd":
 			self.optimizer = GradientDescent(self, loss_function, learning_rate)
-		elif optimizer == "SGD":
+		elif optimizer == "sgd":
 			self.optimizer = StochasticGradientDescent(self, loss_function, learning_rate, decay=decay)
-		elif optimizer == "MGD":
+		elif optimizer == "mgd":
 			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate, n_batch=n_batch)
 		else:
-			print("Error : wrong optimizer")
+			print("Error : wrong optimizer")			######## throw error here instead of printing
 
-	def fit(self, *arg, n_epochs, verbose):
+	def fit(self, *arg, n_epochs=20, verbose=True, early_stopping=None):
 		## If there is just a train set
 		if len(arg) == 2:
 			self._X = arg[0]
@@ -76,7 +75,7 @@ class Sequential(Module):
 			self._valid = True
 		else:
 			print("Error : number of arguments in fit()")
-		self.optimizer.step(self._X, self._y, n_epochs, verbose)
+		self.optimizer.step(self._X, self._y, n_epochs, verbose, early_stopping)
 			
 	def predict(self, X):
 		last_module = len(self.network) - 1
@@ -107,6 +106,7 @@ class Sequential(Module):
 	def update_parameters(self, learning_rate):
 		for i in range(len(self.network) - 1):
 			self.network[i].update_parameters(learning_rate)
+			self.network[i].zero_grad()
 
 	def backward(self):
 		loss_function = self.network[len(self.network) - 1]
@@ -119,7 +119,7 @@ class Sequential(Module):
 
 	############################################### DISPLAY FUNCTIONS ###############################################
 
-	def show_updates(self, cpt_epoch):
+	def show_updates(self, cpt_epoch, learning_rate):
 		print("epoch :", '{:>03g}'.format(cpt_epoch), end="")
 		train_loss, train_acc = self.compute_train_score()
 		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
@@ -134,18 +134,21 @@ class Sequential(Module):
 				print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
 			else:
 				print(", valid_loss :", " "+('{:<2e}'.format(valid_loss)), end="")
+		print(", learning_rate :", '{:<2e}'.format(learning_rate), end="")
 		print("")
 
 	def update_stats(self):
 		## Updates train tracking
-		loss, acc = self.compute_train_score()
-		self._train_loss_values.append(loss)
-		self._train_acc_values.append(acc)
+		train_loss, train_acc = self.compute_train_score()
+		self._train_loss_values.append(train_loss)
+		self._train_acc_values.append(train_acc)
 		## Updates valid tracking
 		if self._valid:
-			loss, acc = self.compute_valid_score()
-			self._valid_loss_values.append(loss)
-			self._valid_acc_values.append(acc)
+			valid_loss, valid_acc = self.compute_valid_score()
+			self._valid_loss_values.append(valid_loss)
+			self._valid_acc_values.append(valid_acc)
+			return train_loss, train_acc, valid_loss, valid_acc
+		return train_loss, train_acc
 
 	def compute_scores(self):
 		train_loss, train_acc = self.compute_train_score(self, type)
@@ -161,6 +164,8 @@ class Sequential(Module):
 		loss = self.network[len(self.network) - 1]._output.mean()
 		if self._metric == "accuracy":
 			acc = np.where(self._y == self.network[len(self.network) - 2]._output.argmax(axis=1), 1, 0).mean()
+		else:
+			acc = loss
 		return loss, acc
 
 	def compute_valid_score(self):
@@ -171,6 +176,8 @@ class Sequential(Module):
 		loss = self.network[len(self.network) - 1]._output.mean()
 		if self._metric == "accuracy":
 			acc = np.where(self._valid_y == self.network[len(self.network) - 2]._output.argmax(axis=1), 1, 0).mean()
+		else:
+			acc = loss
 		return loss, acc
 
 	def plot_stats(self):
@@ -196,7 +203,7 @@ class Sequential(Module):
 		plt.show()
 
 	def summary(self):
-		print("=========================================================================")
+		print("====================================================================================")
 		print("==> Network :")
 		for i, m in enumerate(self.network):
 			type_ = str(type(m))
@@ -207,9 +214,9 @@ class Sequential(Module):
 				print(" and activation :", element)
 			elif "loss_functions" in type_:
 				print("* Loss :", element)
-		print("* Optimizer :", self._optimizer_name)
+		print("* Optimizer :", str(type(self.optimizer)).split(".")[-1][:-2])
 		print("* Total number of parameters :", self.count_parameters())
-		print("=========================================================================")
+		print("====================================================================================")
 
 	############################################### UTILITY FUNCTIONS ###############################################
 

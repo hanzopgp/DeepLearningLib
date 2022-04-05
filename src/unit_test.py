@@ -8,12 +8,22 @@ GREEN = "\033[92m"
 RED = "\033[91m"
 ENDC = "\033[0m"
 
-def classif_score(
+def binary_classif_score(
 	Y_hat: np.ndarray,
 	Y: np.ndarray
 	):
 	predictions = np.argmax(Y_hat, axis=1).reshape(-1, 1)
-	# print(Y_hat.shape, Y.shape, predictions.shape)
+	# print(predictions[0], Y[0], Y_hat[0])
+	return np.sum(predictions == Y) / Y.shape[0]
+
+def multi_classif_score(
+	Y_hat: np.ndarray,
+	Y: np.ndarray
+	):
+	# print(Y[0])
+	Y = np.argmax(Y, axis=1)
+	predictions = np.argmax(Y_hat, axis=1)
+	# print(predictions[0], Y[0], Y_hat[0])
 	return np.sum(predictions == Y) / Y.shape[0]
 
 def mse_score(
@@ -61,16 +71,17 @@ def run_test(
 if __name__ == '__main__':
 	np.random.seed(42)
 	
+	#############################################################################
 	print("===== SIMPLE CLASSIFICATION PROBLEM WITH 2 CLASSES =====")
 	gen2C = TwoClassGen()
 	gen2C.make_2_gaussians(sigma=0.5)
-	gen2C.display_data()
+	# gen2C.display_data()
 
 	test_params = {
-		"2 Gaussians, BCE loss, GD": ("binary_crossentropy", "GD"),
-		"2 Gaussians, BCE loss, SGD": ("binary_crossentropy", "SGD"),
-		"2 Gaussians, Sparse BCE loss, GD": ("sparse_binary_crossentropy", "GD"),
-		"2 Gaussians, Sparse BCE loss, SGD": ("sparse_binary_crossentropy", "SGD")
+		# "2 Gaussians, BCE loss, GD": ("binary_crossentropy", "gd"),
+		# "2 Gaussians, BCE loss, SGD": ("binary_crossentropy", "sgd"),
+		# "2 Gaussians, Sparse BCE loss, GD": ("sparse_binary_crossentropy", "gd"),
+		# "2 Gaussians, Sparse BCE loss, SGD": ("sparse_binary_crossentropy", "sgd")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -85,7 +96,7 @@ if __name__ == '__main__':
 			compile_kwargs=dict(
 				loss=loss,
 				optimizer=optim,
-				learning_rate=1e-3,
+				learning_rate=1e-4,
 				metric="accuracy"
 			),
 			fit_kwargs=dict(
@@ -93,17 +104,17 @@ if __name__ == '__main__':
 				verbose=False
 			),
 			target_score=0.9,
-			scoring_func=classif_score,
+			scoring_func=binary_classif_score,
 			scoring_method="gt"
 		)
 
 	gen2C.make_4_gaussians(sigma=0.2)
-	gen2C.display_data()
+	# gen2C.display_data()
 	test_params = {
-		"4 Gaussians, BCE loss, GD optim": ("binary_crossentropy", "GD"),
-		"4 Gaussians, BCE loss, SGD optim": ("binary_crossentropy", "SGD"),
-		"4 Gaussians, Sparse BCE loss, GD optim": ("sparse_binary_crossentropy", "GD"),
-		"4 Gaussians, Sparse BCE loss, SGD optim": ("sparse_binary_crossentropy", "SGD")
+		# "4 Gaussians, BCE loss, GD optim": ("binary_crossentropy", "gd"),
+		# "4 Gaussians, BCE loss, SGD optim": ("binary_crossentropy", "sgd"),
+		# "4 Gaussians, Sparse BCE loss, GD optim": ("sparse_binary_crossentropy", "gd"),
+		# "4 Gaussians, Sparse BCE loss, SGD optim": ("sparse_binary_crossentropy", "sgd")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -125,53 +136,51 @@ if __name__ == '__main__':
 				n_epochs=30,
 				verbose=False
 			),
-			target_score=0.9,
-			scoring_func=classif_score,
+			target_score=0.85,
+			scoring_func=binary_classif_score,
 			scoring_method="gt"
 		)
 	del gen2C
 
 	#############################################################################
-	# print(end='\n')
-	# nb_class = 4
-	# print(f"===== CLASSIFICATION WITH {nb_class} CLASSES =====")
-	# gen4C = MultiClassGen(nb_class)
-	# gen4C.make_vertical()
+	print(end='\n')
+	nb_class = 4
+	print(f"===== CLASSIFICATION WITH {nb_class} CLASSES =====")
+	gen4C = MultiClassGen(nb_class)
+	gen4C.make_vertical()
 	# gen4C.display_data()
-	# X, Y = gen4C.get_data()
-	# Y = one_hot(Y, nb_class)
 	
-	# test_params = {
-	# 	"Vertical data, Categorical CE, GD optim": ("categorical_crossentropy", "GD"),
-	# 	"Vertical data, Categorical CE, SGD optim": ("categorical_crossentropy", "SGD"),
-	# 	# "Vertical data, Sparse CCE, GD optim": ("sparse_categorical_crossentropy", "GD"),
-	# 	# "Vertical data, Sparse CCE, SGD optim": ("sparse_categorical_crossentropy", "SGD"),
-	# }
-	# for name in test_params:
-	# 	loss, optim = test_params[name]
-	# 	run_test(
-	# 		test_name=name,
-	# 		X=gen4C.x, Y=Y,
-	# 		layers=[
-	# 			(Linear(2, nb_class * 4), "tanh"),
-	# 			(Linear(nb_class * 4, nb_class), "sigmoid")
-	# 		],
-	# 		model_kwargs=None,
-	# 		compile_kwargs=dict(
-	# 			loss=loss,
-	# 			optimizer=optim,
-	# 			learning_rate=1e-3,
-	# 			metric="accuracy"
-	# 		),
-	# 		fit_kwargs=dict(
-	# 			n_epochs=50,
-	# 			verbose=False
-	# 		),
-	# 		target_score=0.9,
-	# 		scoring_func=classif_score,
-	# 		scoring_method="gt"
-	# 	)
-	# del gen4C
+	test_params = {
+		# "Vertical data, Categorical CE, GD optim": ("categorical_crossentropy", "gd"),
+		# "Vertical data, Categorical CE, SGD optim": ("categorical_crossentropy", "sgd"),
+		# "Vertical data, Sparse CCE, GD optim": ("sparse_categorical_crossentropy", "gd"),
+		# "Vertical data, Sparse CCE, SGD optim": ("sparse_categorical_crossentropy", "sgd"),
+	}
+	for name in test_params:
+		loss, optim = test_params[name]
+		run_test(
+			test_name=name,
+			X=gen4C.x, Y=one_hot(gen4C.y, nb_class),
+			layers=[
+				(Linear(2, nb_class * 4), "tanh"),
+				(Linear(nb_class * 4, nb_class), "sigmoid")
+			],
+			model_kwargs=None,
+			compile_kwargs=dict(
+				loss=loss,
+				optimizer=optim,
+				learning_rate=0.01,
+				metric="accuracy"
+			),
+			fit_kwargs=dict(
+				n_epochs=100,
+				verbose=False
+			),
+			target_score=0.85,
+			scoring_func=multi_classif_score,
+			scoring_method="gt"
+		)
+	del gen4C
 
 	# gen2C.make_checker_board()
 	# gen2C.display_data()

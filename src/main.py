@@ -1,27 +1,31 @@
-# from data.DataGeneration import DataGeneration
-# from layers.Linear import Linear
-# from network.Sequential import Sequential
 from global_imports import *
 from utils.utils import *
 
-# import numpy as np
-np.random.seed(42)
 
+###### ToDoList:
 
-## ToDoList:
+## Debug cases such as nn failing to converge in some situations
 ## Enhance loss/metric computation, avoid forward pass somehow
-## Try regression
-## Build test package with all the examples that works !!! (one per .py file)
+## AutoEncoders (bonus : sharing weight matrixes)
+## Clean early stopping code --> implement it in GD / MGD
+## CNN
 
-## What currently works:
-## Binary classification on vertical data
-## Multiclass classification on vertical data
-## Regression ???
-## Binary classification on spiral data ???
-## Multiclass classification on spiral data ???
-## Binary classification on real data () ???
-## Multiclass classification on real data (USPS) ???
 
+###### AutoEncoders ideas: (need to implement at least one and study it)
+
+## Image reconstruction with AutoEncoders ???
+## Represent 2D/3D latent space (bonus : MD latent space with T-sne) ???
+## Using AutoEncoders on noisy data and observing errors ???
+## Classification using latent space given by AutoEncoders ???
+
+
+##### Implemented: 
+
+## * Initialization :
+## --> Xavier initialization
+
+## * Layers :
+## --> Linear()
 
 ## * Activation functions:
 ## --> hidden_layer    : relu, sigmoid, softmax, tanh
@@ -33,10 +37,16 @@ np.random.seed(42)
 ## --> regression      : mse, mae, rmse
 
 ## * Optimizer functions:
-## --> basic optimizer : GD, SGD, MGD
+## --> basic optimizer : gd, sgd, mgd
 
 ## * Score types:
-## classification score: accuracy
+## --> classification : accuracy
+
+## * Regularization:
+## --> L2 with regularization_lambda
+
+## * Early stopping:
+## --> Dictionnary with "metric", "patience", "min_delta"
 
 
 if __name__ == '__main__':
@@ -66,7 +76,7 @@ if __name__ == '__main__':
 	model.compile(loss="sparse_categorical_crossentropy", 
 				  #loss="sparse_binary_crossentropy",
 				  #loss="mse",
-				  optimizer="SGD",
+				  optimizer="sgd",
 				  learning_rate=learning_rate,
 				  metric="accuracy",
 				  n_batch=n_batch, ## If we use MGD
