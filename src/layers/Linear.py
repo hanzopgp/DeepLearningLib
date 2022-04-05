@@ -1,11 +1,12 @@
 from Core import *
 from global_imports import *
+from global_variables import *
 
 # Source: https://web.eecs.umich.edu/~justincj/teaching/eecs442/notes/linear-backprop.html
 
 
 class Linear(Module):
-	def __init__(self, size_in, size_out, init_type="xavier", regularization_lambda=0.001):
+	def __init__(self, size_in, size_out, init_type="xavier", regularization_lambda=1e-9):
 		super().__init__()
 		if init_type == "xavier":
 			self._parameters = (np.random.rand(size_in, size_out) * 2 - 1) / np.sqrt(size_out)
@@ -27,6 +28,9 @@ class Linear(Module):
 		assert(input.shape[1] == self._parameters.shape[0])
 		self._input = input
 		self._output = self._input @ self._parameters + self._bias
+		## Avoiding overflow in activation functions
+		# self._output = np.where(self._output > AVOID_OVERFLOW_VALUE, AVOID_OVERFLOW_VALUE, self._output)
+		# self._output = np.where(self._output < -AVOID_OVERFLOW_VALUE, -AVOID_OVERFLOW_VALUE, self._output)
 
 	def backward_update_gradient(self, delta):
 		assert(delta.shape == self._output.shape)

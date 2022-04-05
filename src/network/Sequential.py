@@ -27,7 +27,7 @@ class Sequential(Module):
 		else:
 			print("Error : wrong activation function")
 
-	def compile(self, loss, optimizer, learning_rate, metric, n_batch=0, decay=1e-6):
+	def compile(self, loss, optimizer="sgd", learning_rate=1e-3, metric=None, n_batch=0, decay=1e-6):
 		## Choosing a metric
 		self._metric = metric
 		## Choosing a loss function for our network
@@ -52,16 +52,16 @@ class Sequential(Module):
 		else:
 			print("Error : wrong loss function")
 		## Choosing and optimizer function for our network
-		if optimizer == "GD":
+		if optimizer == "gd":
 			self.optimizer = GradientDescent(self, loss_function, learning_rate)
-		elif optimizer == "SGD":
+		elif optimizer == "sgd":
 			self.optimizer = StochasticGradientDescent(self, loss_function, learning_rate, decay=decay)
-		elif optimizer == "MGD":
+		elif optimizer == "mgd":
 			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate, n_batch=n_batch)
 		else:
 			print("Error : wrong optimizer")
 
-	def fit(self, *arg, n_epochs, verbose=True, early_stopping=None):
+	def fit(self, *arg, n_epochs=20, verbose=True, early_stopping=None):
 		## If there is just a train set
 		if len(arg) == 2:
 			self._X = arg[0]
@@ -164,6 +164,8 @@ class Sequential(Module):
 		loss = self.network[len(self.network) - 1]._output.mean()
 		if self._metric == "accuracy":
 			acc = np.where(self._y == self.network[len(self.network) - 2]._output.argmax(axis=1), 1, 0).mean()
+		else:
+			acc = loss
 		return loss, acc
 
 	def compute_valid_score(self):
@@ -174,6 +176,8 @@ class Sequential(Module):
 		loss = self.network[len(self.network) - 1]._output.mean()
 		if self._metric == "accuracy":
 			acc = np.where(self._valid_y == self.network[len(self.network) - 2]._output.argmax(axis=1), 1, 0).mean()
+		else:
+			acc = loss
 		return loss, acc
 
 	def plot_stats(self):

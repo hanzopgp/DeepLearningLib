@@ -37,7 +37,7 @@ from utils.utils import *
 ## --> regression      : mse, mae, rmse
 
 ## * Optimizer functions:
-## --> basic optimizer : GD, SGD, MGD
+## --> basic optimizer : gd, sgd, mgd
 
 ## * Score types:
 ## --> classification : accuracy
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 	model.compile(loss="sparse_categorical_crossentropy", 
 				  #loss="sparse_binary_crossentropy",
 				  #loss="mse",
-				  optimizer="SGD",
+				  optimizer="sgd",
 				  learning_rate=learning_rate,
 				  metric="accuracy",
 				  n_batch=n_batch, ## If we use MGD

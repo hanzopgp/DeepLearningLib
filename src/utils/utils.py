@@ -16,6 +16,14 @@ def split_data(X, y, train_split=0.2, shuffle=True):
 	split = int(X.shape[0]*train_split)
 	return X[:split], X[split:], y[:split], y[split:]
 
+def split_X(X, train_split=0.2, shuffle=True):
+	if shuffle:
+		idx = np.arange(X.shape[0])
+		np.random.shuffle(idx)
+		X = X[idx]
+	split = int(X.shape[0]*train_split)
+	return X[:split], X[split:]
+
 def min_max_scaler(X, min_input, max_input):
 	max_ = X.max(axis=0)
 	min_ = X.min(axis=0)

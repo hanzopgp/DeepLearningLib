@@ -1,6 +1,7 @@
 from Core import *
 from utils.utils import one_hot
 from global_imports import *
+from global_variables import *
 
 
 class SparseCategoricalCrossEntropySoftmax(Loss):
@@ -16,4 +17,4 @@ class SparseCategoricalCrossEntropySoftmax(Loss):
 
 	def backward(self):
 		exp_ = np.exp(self._yhat)
-		self._new_delta = exp_ / np.sum(exp_, axis=1).reshape((-1, 1)) - self._y
+		self._new_delta = exp_ / (np.sum(exp_, axis=1).reshape((-1, 1))+DIVIDE_BY_ZERO_EPS) - self._y
