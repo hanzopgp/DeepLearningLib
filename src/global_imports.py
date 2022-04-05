@@ -3,6 +3,8 @@ np.random.seed(42)
 from matplotlib import pyplot as plt
 import tensorflow as tf
 from tqdm import tqdm
+from numba import jit, int32, float32 
+from numba.experimental import jitclass
 
 import global_variables
 

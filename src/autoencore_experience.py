@@ -17,11 +17,14 @@ def mnist_classification_mlp():
 	n_classes = len(np.unique(y))	
 	init_type = "xavier"
 	learning_rate = 1e-2
-	decay = 1e-10
-	n_epochs = 10
+	decay = 1e-2
+	regularization_lambda = 1e-6 ## L2 regularization
+	n_epochs = 30
 	train_split = 0.8
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
+	size = 5_000
+	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 
 	# model = tf.keras.models.Sequential()
 	# model.add(tf.keras.layers.Dense(256, activation="tanh")) 
@@ -36,9 +39,18 @@ def mnist_classification_mlp():
 
 	## Building and training model
 	model = Sequential()
-	model.add(layer=Linear(n_features, 256, init_type=init_type), activation="tanh")
-	model.add(layer=Linear(256, 128, init_type=init_type), activation="tanh")
-	model.add(layer=Linear(128, n_classes, init_type=init_type), activation="softmax")
+	model.add(layer=Linear(n_features, 
+						   256, 
+						   init_type=init_type, 
+						   regularization_lambda=regularization_lambda), activation="tanh")
+	model.add(layer=Linear(256, 
+						   128, 
+						   init_type=init_type, 
+						   regularization_lambda=regularization_lambda), activation="tanh")
+	model.add(layer=Linear(128, 
+						   n_classes, 
+						   init_type=init_type, 
+						   regularization_lambda=regularization_lambda), activation="softmax")
 	model.compile(loss="sparse_categorical_crossentropy", 
 				  optimizer="SGD",
 				  learning_rate=learning_rate,
