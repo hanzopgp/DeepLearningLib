@@ -13,24 +13,22 @@ def binary_classif_score(
 	Y: np.ndarray
 	):
 	predictions = np.argmax(Y_hat, axis=1).reshape(-1, 1)
-	# print(predictions[0], Y[0], Y_hat[0])
 	return np.sum(predictions == Y) / Y.shape[0]
 
 def multi_classif_score(
 	Y_hat: np.ndarray,
 	Y: np.ndarray
 	):
-	# print(Y[0])
-	Y = np.argmax(Y, axis=1)
+	oh = not (len(Y.shape) == 1 or Y.shape[1] == 1)	# labels are one-hot encoded?
+	Y = np.argmax(Y, axis=1) if oh else Y.reshape(-1)
 	predictions = np.argmax(Y_hat, axis=1)
-	# print(predictions[0], Y[0], Y_hat[0])
 	return np.sum(predictions == Y) / Y.shape[0]
 
 def mse_score(
 	Y_hat: np.ndarray,
 	Y: np.ndarray
 	):
-	return np.mean((Y_hat - Y) ** 2, axis=0)
+	return np.mean((Y_hat - Y) ** 2)
 
 def run_test(
 	test_name: str,						# Name of test for displaying purpose
@@ -158,9 +156,12 @@ if __name__ == '__main__':
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
+		X, Y = gen4C.get_data()
+		if "sparse" not in loss:
+			Y = one_hot(Y, nb_class)
 		run_test(
 			test_name=name,
-			X=gen4C.x, Y=one_hot(gen4C.y, nb_class),
+			X=X, Y=Y,
 			layers=[
 				(Linear(2, nb_class * 4), "tanh"),
 				(Linear(nb_class * 4, nb_class), "sigmoid")
@@ -182,19 +183,53 @@ if __name__ == '__main__':
 		)
 	del gen4C
 
-	# gen2C.make_checker_board()
-	# gen2C.display_data()
-	# gen2C.make_4_gaussians(sigma=0.5)
-	# gen2C.display_data()
+	#############################################################################
+	print(end='\n')
+	nb_class = 4
+	print("===== LINEAR REGRESSION PROBLEM =====")
+	genCont = ContinuousGen()
+	genCont.make_regression()
+	# genCont.display_data()
+	
+	params_optim = [
+		# "gd",
+		"sgd",
+		# "mgd"
+	]
+	params_loss = [
+		"mse",
+		# "mae",
+		# "rmse"
+	]
+	params_epoch = [
+		# 10,
+		50,
+		# 100
+	]
 
-	# gen4C = MultiClassGen(nb_class=4)
-	# gen4C.make_vertical()
-	# gen4C.display_data()
-	# gen4C.make_spiral()
-	# gen4C.display_data()
-
-	# cont = ContinuousGen(sigma=0.2)
-	# cont.make_sinus(freq=3, ampli=3)
-	# cont.display_data()
-	# cont.make_regression(slope=5, affine=10)
-	# cont.display_data()
+	for optim in params_optim:
+		for loss in params_loss:
+			for n_epochs in params_epoch:
+				name = f"Optimizer {optim}\tLoss function {loss}\tNum epochs {n_epochs}"
+				run_test(
+					test_name=name,
+					X=genCont.x, Y=genCont.y,
+					layers=[
+						(Linear(1, 4), "relu"),
+						(Linear(4, 1), "linear")	# needs linear activation here
+					],
+					model_kwargs=None,
+					compile_kwargs=dict(
+						loss=loss,
+						optimizer=optim,
+						learning_rate=0.001
+					),
+					fit_kwargs=dict(
+						n_epochs=n_epochs,
+						verbose=False
+					),
+					target_score=0.1,
+					scoring_func=mse_score,
+					scoring_method="lt"
+				)
+	del genCont

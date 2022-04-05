@@ -5,7 +5,7 @@ from Core import *
 
 class CategoricalCrossEntropy(Loss):
 	def forward(self, y, yhat):
-		assert(y.shape == yhat.shape)
+		# assert(y.shape == yhat.shape)
 		self._y = y
 		self._yhat = yhat
 		self._output = 1 - np.sum(self._yhat * self._y, axis=1)
