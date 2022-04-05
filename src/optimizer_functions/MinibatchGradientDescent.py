@@ -10,7 +10,7 @@ class MinibatchGradientDescent(Optimizer):
 		self._learning_rate = learning_rate
 		self._n_batch = n_batch
 
-	def step(self, X, y, n_epochs, verbose):
+	def step(self, X, y, n_epochs, verbose, early_stopping):
 		minibatches_x, minibatches_y = np.array(np.array_split(X, self._n_batch)), np.array(np.array_split(y, self._n_batch))
 		n = minibatches_x.shape[0]
 		for cpt_epoch in range(n_epochs):

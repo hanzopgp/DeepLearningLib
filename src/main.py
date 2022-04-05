@@ -1,30 +1,31 @@
-# from data.DataGeneration import DataGeneration
-# from layers.Linear import Linear
-# from network.Sequential import Sequential
 from global_imports import *
 from utils.utils import *
 
 
-## ToDoList:
+###### ToDoList:
+
+## Debug cases such as nn failing to converge in some situations
 ## Enhance loss/metric computation, avoid forward pass somehow
 ## AutoEncoders (bonus : sharing weight matrixes)
+## Clean early stopping code --> implement it in GD / MGD
 ## CNN
 
-## What currently works:
-## Binary classification on vertical data OK
-## Multiclass classification on vertical data OK
-## Regression ???
-## Binary classification on spiral data ???
-## Multiclass classification on spiral data ???
-## Binary classification on real data ???
-## Multiclass classification on real data (USPS) ???
 
-# AutoEncoders ideas: (need to implement at least one and study it)
+###### AutoEncoders ideas: (need to implement at least one and study it)
+
 ## Image reconstruction with AutoEncoders ???
 ## Represent 2D/3D latent space (bonus : MD latent space with T-sne) ???
 ## Using AutoEncoders on noisy data and observing errors ???
 ## Classification using latent space given by AutoEncoders ???
 
+
+##### Implemented: 
+
+## * Initialization :
+## --> Xavier initialization
+
+## * Layers :
+## --> Linear()
 
 ## * Activation functions:
 ## --> hidden_layer    : relu, sigmoid, softmax, tanh
@@ -39,7 +40,13 @@ from utils.utils import *
 ## --> basic optimizer : GD, SGD, MGD
 
 ## * Score types:
-## classification score: accuracy
+## --> classification : accuracy
+
+## * Regularization:
+## --> L2 with regularization_lambda
+
+## * Early stopping:
+## --> Dictionnary with "metric", "patience", "min_delta"
 
 
 if __name__ == '__main__':

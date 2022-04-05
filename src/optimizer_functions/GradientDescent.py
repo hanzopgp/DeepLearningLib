@@ -9,7 +9,7 @@ class GradientDescent(Optimizer):
 		self._net.network.append(loss_function)
 		self._learning_rate = learning_rate
 
-	def step(self, X, y, n_epochs, verbose):
+	def step(self, X, y, n_epochs, verbose, early_stopping):
 		for cpt_epoch in range(n_epochs):
 			self._net.forward(X, y)
 			self._net.backward()
