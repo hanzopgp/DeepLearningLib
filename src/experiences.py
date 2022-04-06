@@ -21,9 +21,7 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 	learning_rate = 1e-3
 	decay = 1e-4
 	regularization_lambda = 1e-9
-	n_epochs = 100
 	train_split = 0.8
-	early_stopping = {"patience": 5, "metric": "valid_loss", "min_delta": 0.001}
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
 	size = 10_000
@@ -31,6 +29,8 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 	## Building and training model
 	model = Sequential()
 	if not latent: ## Normal classification on 728 features MNIST
+		n_epochs = 100
+		early_stopping = {"patience": 5, "metric": "valid_loss", "min_delta": 0.001}
 		model.add(layer=Linear(n_features, 
 							256, 
 							init_type=init_type, 
@@ -44,6 +44,8 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 							init_type=init_type, 
 							regularization_lambda=regularization_lambda), activation="softmax")
 	else: ## Latent classification on 64 features MNIST
+		n_epochs = 200
+		early_stopping = {"patience": 15, "metric": "valid_loss", "min_delta": 0.001}
 		model.add(layer=Linear(n_features, 
 							32, 
 							init_type=init_type, 
@@ -164,16 +166,17 @@ def reconstruction_mlp(dataset):
 	## in classification. It should take way less time since we performed dimensionality
 	## reduction. Here we have only two layers in the encoder so we will take some of our
 	## test data and get their representation in our latent space.
-	model._network[0].forward(X_test)
-	model._network[1].forward(model._network[0]._output)
-	model._network[2].forward(model._network[1]._output)
-	latent_space_X = model._network[2]._output
-	latent_space_y = y_test
+	model._network[0].forward(X_test) ## This layer is the first linear one
+	model._network[1].forward(model._network[0]._output) ## This layer is first activation function 
+	model._network[2].forward(model._network[1]._output) ## This layer is the second linear layer
+	model._network[3].forward(model._network[2]._output) ## This layer is the second activation function
+	latent_space_X = model._network[3]._output ## Here we get the output and it's already normalized by tanh
+	latent_space_y = y_test ## We kept track of the labels in order to train the next classifier
 	print("X shape before compression :", X_test.shape)
 	print("X shape after compression :", latent_space_X.shape)
 	## After that we split our latent space data
 	X_train, X_test, y_train, y_test = split_data(latent_space_X, latent_space_y, train_split=train_split, shuffle=True)
-	## And we try to train a classifier with the compressed data
+	## And we train a classifier with the compressed data
 	execute_classification_model(X_train, y_train, X_test, y_test, label_name=label_name_digits_mnist, latent=True)
 	
 
