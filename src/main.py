@@ -28,7 +28,7 @@ from utils.utils import *
 ## --> Linear()
 
 ## * Activation functions:
-## --> hidden_layer    : relu, lrelu, sigmoid, softmax, tanh
+## --> hidden_layer    : relu, lrelu, sigmoid, tanh
 ## --> output layer    : sigmoid, softmax, linear
 
 ## * Loss functions:

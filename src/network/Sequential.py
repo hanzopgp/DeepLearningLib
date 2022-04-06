@@ -122,18 +122,20 @@ class Sequential(Module):
 	def show_updates(self, cpt_epoch, learning_rate):
 		print("epoch :", '{:>03g}'.format(cpt_epoch), end="")
 		train_loss, train_acc = self.compute_train_score()
-		print(", train_acc :", '{:<08g}'.format(train_acc), end="")
+		if train_acc != 666 : ## Don't display when we are doing regression / autoencoder etc ...
+			print(", train_acc :", '{:<08g}'.format(train_acc), end="")
 		if train_loss < 0:
 			print(", train_loss :", '{:<2e}'.format(train_loss), end="")
 		else:
-			print(", train_loss :", " "+('{:<2e}'.format(train_loss)), end="")
+			print(", train_loss :", " " + ('{:<2e}'.format(train_loss)), end="")
 		if self._valid: 
 			valid_loss, valid_acc = self.compute_valid_score()
-			print(", valid_acc :", '{:<08g}'.format(valid_acc), end="")
+			if valid_acc != 666 : ## Don't display when we are doing regression / autoencoder etc ...
+				print(", valid_acc :", '{:<08g}'.format(valid_acc), end="")
 			if valid_loss < 0: 
 				print(", valid_loss :", '{:<2e}'.format(valid_loss), end="")
 			else:
-				print(", valid_loss :", " "+('{:<2e}'.format(valid_loss)), end="")
+				print(", valid_loss :", " " + ('{:<2e}'.format(valid_loss)), end="")
 		print(", learning_rate :", '{:<2e}'.format(learning_rate), end="")
 		print("")
 
@@ -165,7 +167,7 @@ class Sequential(Module):
 		if self._metric == "accuracy":
 			acc = np.where(self._y == self._network[len(self._network) - 2]._output.argmax(axis=1), 1, 0).mean()
 		else:
-			acc = loss
+			acc = 666 ## Trick to avoid displaying acc when not in classification
 		return loss, acc
 
 	def compute_valid_score(self):
@@ -177,7 +179,7 @@ class Sequential(Module):
 		if self._metric == "accuracy":
 			acc = np.where(self._valid_y == self._network[len(self._network) - 2]._output.argmax(axis=1), 1, 0).mean()
 		else:
-			acc = loss
+			acc = 666 ## Trick to avoid displaying acc when not in classification
 		return loss, acc
 
 	def plot_stats(self):

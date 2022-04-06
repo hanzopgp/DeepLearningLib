@@ -20,7 +20,7 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 	init_type = "xavier"
 	learning_rate = 1e-3
 	decay = 1e-4
-	regularization_lambda = 1e-6 ## L2 regularization
+	regularization_lambda = 1e-9
 	n_epochs = 100
 	train_split = 0.8
 	early_stopping = {"patience": 5, "metric": "valid_loss", "min_delta": 0.001}
@@ -30,18 +30,32 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 	## Building and training model
 	model = Sequential()
-	model.add(layer=Linear(n_features, 
-						   256, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
-	model.add(layer=Linear(256, 
-						   128, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
-	model.add(layer=Linear(128, 
-						   n_classes, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="softmax")
+	if not latent: ## Normal classification on 728 features MNIST
+		model.add(layer=Linear(n_features, 
+							256, 
+							init_type=init_type, 
+							regularization_lambda=regularization_lambda), activation="tanh")
+		model.add(layer=Linear(256, 
+							128, 
+							init_type=init_type, 
+							regularization_lambda=regularization_lambda), activation="tanh")
+		model.add(layer=Linear(128, 
+							n_classes, 
+							init_type=init_type, 
+							regularization_lambda=regularization_lambda), activation="softmax")
+	else: ## Latent classification on 64 features MNIST
+		model.add(layer=Linear(n_features, 
+							32, 
+							init_type=init_type, 
+							regularization_lambda=regularization_lambda), activation="tanh")
+		model.add(layer=Linear(32, 
+							16, 
+							init_type=init_type, 
+							regularization_lambda=regularization_lambda), activation="tanh")
+		model.add(layer=Linear(16, 
+							n_classes, 
+							init_type=init_type, 
+							regularization_lambda=regularization_lambda), activation="softmax")	
 	model.compile(loss="sparse_categorical_crossentropy", 
 				  optimizer="sgd",
 				  learning_rate=learning_rate,
@@ -57,11 +71,10 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 			  early_stopping=early_stopping)
 	model.plot_stats()
 	if not latent:
-		preds = model.predict(X_test)
+		preds = np.argmax(model.predict(X_test), axis=1)
 		for i in range(3):
 			plt.imshow(X_test[i].reshape(width, height))
-			plt.title(str("Prediction :" + label_name[preds[i]]))
-			print("Ground truth label :", y_test[i])
+			plt.title(str("Prediction :" + label_name[preds[i]] + " Ground truth label :" + str(y_test[i])))
 			plt.show()
 
 def classification_mlp(dataset):
@@ -82,6 +95,8 @@ def reconstruction_mlp(dataset):
 	elif dataset == "digits_mnist":     
 		loader = tf.keras.datasets.mnist  
 	(X, y), (X_test, y_test) = loader.load_data()
+	width = X.shape[1]
+	height = X.shape[2]
 	## Reshaping to get linear data in order to use our feed forward model
 	X = X.reshape(X.shape[0], -1)
 	X_test = X_test.reshape(X_test.shape[0], -1)
@@ -92,20 +107,20 @@ def reconstruction_mlp(dataset):
 	n_features = X.shape[1]
 	n_classes = X.shape[1]
 	init_type = "xavier"
-	learning_rate = 1e-3
-	decay = 1e-3
-	regularization_lambda = 1e-9 ## L2 regularization
-	n_epochs = 3
+	learning_rate = 5e-4 ## Might want to go for 1e-4
+	decay = 1e-4
+	regularization_lambda = 1e-9 
+	n_epochs = 100
 	train_split = 0.8
 	early_stopping = {"patience": 5, "metric": "valid_loss", "min_delta": 0.001}
-	## Splitting to get validation set
-	## We don't need y labels for the autoencoder but it will be usefull to keep it
+	## Now we split to get validation set for the model training but this time we
+	## don't need y labels for the autoencoder. Although it will be usefull to keep it
 	## in order to train a classifier with the latent space representation made by our
 	## autoencoder model.
 	X_train, X_valid, latent_space_y, _ = split_data(X, y, train_split=train_split, shuffle=True)
 	size = 10_000
 	X_train, X_valid, X_test, latent_space_y, y_test = X_train[:size], X_valid[:size], X_test[:size], latent_space_y[:size], y_test[:size]
-	## Building and training model
+	## Building and training autoencoder model
 	model = Sequential()
 	model.add(layer=Linear(n_features, 
 						   256, 
@@ -136,14 +151,14 @@ def reconstruction_mlp(dataset):
 			  verbose=True,
 			  early_stopping=early_stopping)
 	model.plot_stats()
-	# preds = model.predict(X_test)
-	# for i in range(3):
-	# 	plt.imshow(X_test[i].reshape(width, height))
-	# 	plt.title("Input image")
-	# 	plt.show()
-	# 	plt.imshow(preds[i].reshape(width, height))
-	# 	plt.title("Reconstructed image")
-	# 	plt.show()
+	preds = model.predict(X_test)
+	for i in range(3):
+		plt.imshow(X_test[i].reshape(width, height))
+		plt.title("Input image")
+		plt.show()
+		plt.imshow(preds[i].reshape(width, height))
+		plt.title("Reconstructed image")
+		plt.show()
 	## Once the model is trained and working we forward some data in the encoder layers
 	## Thanks to that we get a compressed representation and we can see the performance
 	## in classification. It should take way less time since we performed dimensionality
@@ -161,7 +176,10 @@ def reconstruction_mlp(dataset):
 	execute_classification_model(X_train, y_train, X_test, y_test, label_name=label_name_digits_mnist, latent=True)
 	
 
+## Classic classification with a MLP model
 # classification_mlp("fashion_mnist")
-classification_mlp("digits_mnist")
+# classification_mlp("digits_mnist")
+
+## Autoencoder reconstruction + classification with latent space
 # reconstruction_mlp("fashion_mnist")
 reconstruction_mlp("digits_mnist")
