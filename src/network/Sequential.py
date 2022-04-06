@@ -24,6 +24,10 @@ class Sequential(Module):
 			self._network.append(Tanh())
 		elif activation == "softmax":
 			self._network.append(Softmax())
+		elif activation == "linear":
+			self._network.append(Lin())
+		elif activation == "lrelu":
+			self._network.append(LeakyReLU())
 		else:
 			print("Error : wrong activation function")
 
@@ -196,13 +200,14 @@ class Sequential(Module):
 		## Show accuracy per epochs
 		la_train = np.array(self._train_acc_values)
 		la_valid = np.array(self._valid_acc_values)
-		plt.plot(la_train, label="train")
-		plt.plot(la_valid, label="valid")
-		plt.legend(loc="lower right")
-		plt.ylabel('Accuracy')
-		plt.xlabel('Epochs')
-		plt.title("Accuracy per epochs")
-		plt.show()
+		if len(la_train) <= 1: ## Don't show this metric if not classification
+			plt.plot(la_train, label="train")
+			plt.plot(la_valid, label="valid")
+			plt.legend(loc="lower right")
+			plt.ylabel('Accuracy')
+			plt.xlabel('Epochs')
+			plt.title("Accuracy per epochs")
+			plt.show()
 
 	def summary(self):
 		print("====================================================================================")

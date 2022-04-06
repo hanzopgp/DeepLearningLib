@@ -1,7 +1,7 @@
 from Core import *
 
 
-class Linear(Module):
+class Lin(Module):
 	def zero_grad(self):
 		pass
 	

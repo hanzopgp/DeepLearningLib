@@ -14,6 +14,8 @@ from activation_functions.ReLU import ReLU
 from activation_functions.Sigmoid import Sigmoid
 from activation_functions.Softmax import Softmax
 from activation_functions.Tanh import Tanh
+from activation_functions.Lin import Lin
+from activation_functions.LeakyReLU import LeakyReLU
 
 from loss_functions.MeanSquaredError import MeanSquaredError
 from loss_functions.MeanAbsoluteError import MeanAbsoluteError

@@ -117,9 +117,9 @@ def reconstruction_mlp(dataset):
 	## don't need y labels for the autoencoder. Although it will be usefull to keep it
 	## in order to train a classifier with the latent space representation made by our
 	## autoencoder model.
-	X_train, X_valid, latent_space_y, _ = split_data(X, y, train_split=train_split, shuffle=True)
+	X_train, X_valid, _, _ = split_data(X, y, train_split=train_split, shuffle=True)
 	size = 10_000
-	X_train, X_valid, X_test, latent_space_y, y_test = X_train[:size], X_valid[:size], X_test[:size], latent_space_y[:size], y_test[:size]
+	X_train, X_valid, X_test, y_test = X_train[:size], X_valid[:size], X_test[:size], y_test[:size]
 	## Building and training autoencoder model
 	model = Sequential()
 	model.add(layer=Linear(n_features, 
@@ -168,6 +168,7 @@ def reconstruction_mlp(dataset):
 	model._network[1].forward(model._network[0]._output)
 	model._network[2].forward(model._network[1]._output)
 	latent_space_X = model._network[2]._output
+	latent_space_y = y_test
 	print("X shape before compression :", X_test.shape)
 	print("X shape after compression :", latent_space_X.shape)
 	## After that we split our latent space data
