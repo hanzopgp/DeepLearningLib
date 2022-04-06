@@ -8,7 +8,7 @@ from global_variables import *
 
 class BinaryCrossEntropy(Loss):
 	def forward(self, y, yhat):
-		assert(y.shape == yhat.shape)
+		# assert(y.shape == yhat.shape)
 		self._y = y
 		self._yhat = yhat
 		self._yhat = np.where(self._yhat < global_variables.MIN_THRESHOLD, global_variables.MIN_THRESHOLD, self._yhat)
