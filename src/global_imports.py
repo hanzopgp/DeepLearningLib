@@ -30,3 +30,5 @@ from optimizer_functions.MinibatchGradientDescent import MinibatchGradientDescen
 
 from layers.Linear import Linear
 from network.Sequential import Sequential
+from cnn.Conv import Convo1D
+from cnn.Pooling import MaxPool1D
