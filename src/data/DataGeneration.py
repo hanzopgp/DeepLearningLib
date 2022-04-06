@@ -32,7 +32,7 @@ class ContinuousGen(DataGeneration):
 		self._mix_data()
 
 	def make_regression(self, slope=1, affine=0):
-		self.x = np.linspace(-2, 2, self.nb_points).reshape(-1, 1)
+		self.x = np.linspace(-1, 1, self.nb_points).reshape(-1, 1)
 		self.y = self.x * slope + affine
 		self._mix_data()
 

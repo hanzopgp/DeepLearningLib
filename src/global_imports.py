@@ -1,7 +1,6 @@
 import numpy as np
 # np.random.seed(42)
 from matplotlib import pyplot as plt
-# import tensorflow as tf
 from tqdm import tqdm
 
 import global_variables

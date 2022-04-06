@@ -31,7 +31,7 @@ class Sequential(Module):
 		else:
 			print("Error : wrong activation function")
 
-	def compile(self, loss, optimizer="sgd", learning_rate=1e-3, metric=None, n_batch=0, decay=1e-6):
+	def compile(self, loss, optimizer="sgd", learning_rate=1e-3, metric=None, n_batch=20, decay=1e-6):
 		## Choosing a metric
 		self._metric = metric
 		## Choosing a loss function for our network

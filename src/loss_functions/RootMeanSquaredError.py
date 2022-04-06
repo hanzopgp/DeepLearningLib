@@ -10,5 +10,5 @@ class RootMeanSquaredError(Loss):
 
 	def backward(self):
 		mse = (self._y - self._yhat) ** 2
-		d_mse = 2 * (self._y - self._yhat)
-		self._new_delta = 1/(2*mse) * (d_mse)
+		d_mse = - 2 * (self._y - self._yhat)
+		self._new_delta = 1/(2*np.sqrt(mse)) * (d_mse)

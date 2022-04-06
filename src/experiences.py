@@ -1,5 +1,7 @@
 from global_imports import *
 from utils.utils import *
+import tensorflow as tf ## Usefull for datasets
+
 
 label_name_fashion_mnist = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 label_name_digits_mnist = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]

@@ -10,4 +10,4 @@ class MeanSquaredError(Loss):
 		self._output = np.sum((self._y - self._yhat) ** 2, axis=1)
 
 	def backward(self):
-		self._new_delta = 2 * (self._y - self._yhat)
+		self._new_delta = -2 * (self._y - self._yhat)

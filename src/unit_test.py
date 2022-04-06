@@ -78,14 +78,20 @@ if __name__ == '__main__':
 	test_params = {
 		# "2 Gaussians, BCE loss, GD": ("binary_crossentropy", "gd"),
 		# "2 Gaussians, BCE loss, SGD": ("binary_crossentropy", "sgd"),
+		# "2 Gaussians, BCE loss, MGD": ("binary_crossentropy", "mgd"),
 		# "2 Gaussians, Sparse BCE loss, GD": ("sparse_binary_crossentropy", "gd"),
-		# "2 Gaussians, Sparse BCE loss, SGD": ("sparse_binary_crossentropy", "sgd")
+		# "2 Gaussians, Sparse BCE loss, SGD": ("sparse_binary_crossentropy", "sgd"),
+		# "2 Gaussians, Sparse BCE loss, MGD": ("sparse_binary_crossentropy", "mgd")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
+		if "sparse" not in loss:
+			Y = one_hot(gen2C.y, 2)
+		else:
+			Y = gen2C.y
 		run_test(
 			test_name=name,
-			X=gen2C.x, Y=gen2C.y,
+			X=gen2C.x, Y=Y,
 			layers=[
 				(Linear(2, 4), "tanh"),
 				(Linear(4, 2), "sigmoid")
@@ -98,10 +104,10 @@ if __name__ == '__main__':
 				metric="accuracy"
 			),
 			fit_kwargs=dict(
-				n_epochs=30,
+				n_epochs=50,
 				verbose=False
 			),
-			target_score=0.9,
+			target_score=0.85,
 			scoring_func=binary_classif_score,
 			scoring_method="gt"
 		)
@@ -111,14 +117,20 @@ if __name__ == '__main__':
 	test_params = {
 		# "4 Gaussians, BCE loss, GD optim": ("binary_crossentropy", "gd"),
 		# "4 Gaussians, BCE loss, SGD optim": ("binary_crossentropy", "sgd"),
+		# "4 Gaussians, BCE loss, MGD optim": ("binary_crossentropy", "mgd"),
 		# "4 Gaussians, Sparse BCE loss, GD optim": ("sparse_binary_crossentropy", "gd"),
-		# "4 Gaussians, Sparse BCE loss, SGD optim": ("sparse_binary_crossentropy", "sgd")
+		# "4 Gaussians, Sparse BCE loss, SGD optim": ("sparse_binary_crossentropy", "sgd"),
+		# "4 Gaussians, Sparse BCE loss, MGD optim": ("sparse_binary_crossentropy", "mgd")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
+		if "sparse" not in loss:
+			Y = one_hot(gen2C.y, 2)
+		else:
+			Y = gen2C.y
 		run_test(
 			test_name=name,
-			X=gen2C.x, Y=gen2C.y,
+			X=gen2C.x, Y=Y,
 			layers=[
 				(Linear(2, 4), "tanh"),
 				(Linear(4, 2), "sigmoid")
@@ -127,11 +139,12 @@ if __name__ == '__main__':
 			compile_kwargs=dict(
 				loss=loss,
 				optimizer=optim,
-				learning_rate=1e-3,
+				learning_rate=1e-2,
+				n_batch = 20,
 				metric="accuracy"
 			),
 			fit_kwargs=dict(
-				n_epochs=30,
+				n_epochs=50,
 				verbose=False
 			),
 			target_score=0.85,
@@ -149,19 +162,22 @@ if __name__ == '__main__':
 	# gen4C.display_data()
 	
 	test_params = {
-		# "Vertical data, Categorical CE, GD optim": ("categorical_crossentropy", "gd"),
-		# "Vertical data, Categorical CE, SGD optim": ("categorical_crossentropy", "sgd"),
+		# "Vertical data, CCE, GD optim": ("categorical_crossentropy", "gd"),
+		# "Vertical data, CCE, SGD optim": ("categorical_crossentropy", "sgd"),
+		# "Vertical data, CCE, MGD optim": ("categorical_crossentropy", "mgd"),
 		# "Vertical data, Sparse CCE, GD optim": ("sparse_categorical_crossentropy", "gd"),
 		# "Vertical data, Sparse CCE, SGD optim": ("sparse_categorical_crossentropy", "sgd"),
+		# "Vertical data, Sparse CCE, MGD optim": ("sparse_categorical_crossentropy", "mgd"),
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
-		X, Y = gen4C.get_data()
 		if "sparse" not in loss:
-			Y = one_hot(Y, nb_class)
+			Y = one_hot(gen4C.y, 4)
+		else:
+			Y = gen4C.y
 		run_test(
 			test_name=name,
-			X=X, Y=Y,
+			X=gen4C.x, Y=Y,
 			layers=[
 				(Linear(2, nb_class * 4), "tanh"),
 				(Linear(nb_class * 4, nb_class), "sigmoid")
@@ -174,7 +190,7 @@ if __name__ == '__main__':
 				metric="accuracy"
 			),
 			fit_kwargs=dict(
-				n_epochs=100,
+				n_epochs=150,
 				verbose=False
 			),
 			target_score=0.85,
@@ -186,50 +202,44 @@ if __name__ == '__main__':
 	#############################################################################
 	print(end='\n')
 	nb_class = 4
-	print("===== LINEAR REGRESSION PROBLEM =====")
+	print("===== REGRESSION PROBLEM =====")
 	genCont = ContinuousGen()
 	genCont.make_regression()
 	# genCont.display_data()
 	
 	params_optim = [
-		# "gd",
+		"gd",
 		"sgd",
-		# "mgd"
+		"mgd"
 	]
 	params_loss = [
 		"mse",
-		# "mae",
-		# "rmse"
-	]
-	params_epoch = [
-		# 10,
-		50,
-		# 100
+		"mae",
+		"rmse"
 	]
 
 	for optim in params_optim:
 		for loss in params_loss:
-			for n_epochs in params_epoch:
-				name = f"Optimizer {optim}\tLoss function {loss}\tNum epochs {n_epochs}"
-				run_test(
-					test_name=name,
-					X=genCont.x, Y=genCont.y,
-					layers=[
-						(Linear(1, 4), "relu"),
-						(Linear(4, 1), "linear")
-					],
-					model_kwargs=None,
-					compile_kwargs=dict(
-						loss=loss,
-						optimizer=optim,
-						learning_rate=0.001
-					),
-					fit_kwargs=dict(
-						n_epochs=n_epochs,
-						verbose=False
-					),
-					target_score=0.1,
-					scoring_func=mse_score,
-					scoring_method="lt"
-				)
+			name = f"Optimizer {optim}\tLoss function {loss}"
+			run_test(
+				test_name=name,
+				X=genCont.x, Y=genCont.y,
+				layers=[
+					(Linear(1, 4), "relu"),
+					(Linear(4, 1), "linear")
+				],
+				model_kwargs=None,
+				compile_kwargs=dict(
+					loss=loss,
+					optimizer=optim,
+					learning_rate=8e-4
+				),
+				fit_kwargs=dict(
+					n_epochs=150,
+					verbose=False
+				),
+				target_score=0.1,
+				scoring_func=mse_score,
+				scoring_method="lt"
+			)
 	del genCont

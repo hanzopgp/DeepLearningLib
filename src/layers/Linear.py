@@ -29,8 +29,8 @@ class Linear(Module):
 		self._input = input
 		self._output = self._input @ self._parameters + self._bias
 		## Avoiding overflow in activation functions
-		# self._output = np.where(self._output > AVOID_OVERFLOW_VALUE, AVOID_OVERFLOW_VALUE, self._output)
-		# self._output = np.where(self._output < -AVOID_OVERFLOW_VALUE, -AVOID_OVERFLOW_VALUE, self._output)
+		self._output = np.where(self._output > AVOID_OVERFLOW_VALUE, AVOID_OVERFLOW_VALUE, self._output)
+		self._output = np.where(self._output < -AVOID_OVERFLOW_VALUE, -AVOID_OVERFLOW_VALUE, self._output)
 
 	def backward_update_gradient(self, delta):
 		assert(delta.shape == self._output.shape)
