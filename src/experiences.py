@@ -2,11 +2,20 @@ from global_imports import *
 from utils.utils import *
 
 label_name_fashion_mnist = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
+label_name_digits_mnist = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
-def mnist_classification_mlp():
-	## Loading fashion MNIST dataset
-	fashion_mnist = tf.keras.datasets.fashion_mnist                            
-	(X, y), (X_test, y_test) = fashion_mnist.load_data()
+def classification_mlp(dataset):
+	## Loading dataset
+	if dataset == "fashion_mnist":
+		loader = tf.keras.datasets.fashion_mnist
+		label_name = label_name_fashion_mnist 
+	elif dataset == "digits_mnist":     
+		loader = tf.keras.datasets.mnist
+		print(loader)   
+		label_name = label_name_digits_mnist     
+	(X, y), (X_test, y_test) = loader.load_data()
+	width = X.shape[1]
+	height = X.shape[2]
 	## Reshaping to get linear data in order to use our feed forward model
 	X = X.reshape(X.shape[0], -1)
 	X_test = X_test.reshape(X_test.shape[0], -1)
@@ -25,8 +34,8 @@ def mnist_classification_mlp():
 	early_stopping = {"patience": 5, "metric": "valid_loss", "min_delta": 0.001}
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
-	# size = 10_000
-	# X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
+	size = 10_000
+	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 	## Building and training model
 	model = Sequential()
 	model.add(layer=Linear(n_features, 
@@ -57,14 +66,19 @@ def mnist_classification_mlp():
 	model.plot_stats()
 	preds = model.predict(X_test)
 	for i in range(3):
-		plt.imshow(X_test[i].reshape(28,28))
-		plt.title(str("Prediction :"+label_name_fashion_mnist[y_test[i]]))
+		plt.imshow(X_test[i].reshape(width, height))
+		plt.title(str("Prediction :"+label_name[y_test[i]]))
 		plt.show()
 
-def mnist_reconstruction_mlp():
+def reconstruction_mlp(dataset):
 	## Loading fashion MNIST dataset
-	fashion_mnist = tf.keras.datasets.fashion_mnist                            
-	(X, _), (X_test, _) = fashion_mnist.load_data()
+	if dataset == "fashion_mnist":
+		loader = tf.keras.datasets.fashion_mnist
+	elif dataset == "digits_mnist":     
+		loader = tf.keras.datasets.mnist  
+	(X, _), (X_test, _) = loader.load_data()
+	width = X.shape[1]
+	height = X.shape[2]
 	## Reshaping to get linear data in order to use our feed forward model
 	X = X.reshape(X.shape[0], -1)
 	X_test = X_test.reshape(X_test.shape[0], -1)
@@ -118,25 +132,14 @@ def mnist_reconstruction_mlp():
 	model.plot_stats()
 	preds = model.predict(X_test)
 	for i in range(3):
-		plt.imshow(X_test[i].reshape(28,28))
+		plt.imshow(X_test[i].reshape(width, height))
 		plt.title("Input image")
 		plt.show()
-		plt.imshow(preds[i].reshape(28,28))
+		plt.imshow(preds[i].reshape(width, height))
 		plt.title("Reconstructed image")
 		plt.show()
 
-mnist_classification_mlp()
-mnist_reconstruction_mlp()
-
-# choice = "classification_mlp"
-# choice = "reconstruction_autoencoder"
-
-# if choice == "classification_mlp":
-# 	mnist_classification_mlp()
-# elif choice == "classification_cnn":
-# 	pass
-# elif choice == "reconstruction_autoencoder":
-# 	mnist_reconstruction_mlp()
-# elif choice == "classification_autoencoder":
-# 	pass
-	
+# classification_mlp("fashion_mnist")
+# reconstruction_mlp("fashion_mnist")
+# classification_mlp("digits_mnist")
+reconstruction_mlp("digits_mnist")
