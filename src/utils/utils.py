@@ -1,12 +1,13 @@
 import numpy as np
-from global_variables import *
+
+DIVIDE_BY_ZERO_EPS = 1e-9
 
 
 def one_hot(y, n_class):
-	n = y.shape[0]
-	onehot = np.zeros((n, n_class))
-	onehot[np.arange(n), y] = 1
-	return onehot
+	y_copy = y.reshape(-1)
+	res = np.zeros((y.size, n_class), dtype=np.uint8)
+	res[np.arange(y.size), y_copy] = 1
+	return res
 
 def split_data(X, y, train_split=0.2, shuffle=True):
 	assert(X.shape[0] == y.shape[0])

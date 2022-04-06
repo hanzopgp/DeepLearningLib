@@ -1,14 +1,12 @@
 import numpy as np
-np.random.seed(42)
+# np.random.seed(42)
 from matplotlib import pyplot as plt
-import tensorflow as tf
+# import tensorflow as tf
 from tqdm import tqdm
-from numba import jit, int32, float32 
-from numba.experimental import jitclass
 
 import global_variables
 
-from data.DataGeneration import DataGeneration
+from data.DataGeneration import DataGeneration, ContinuousGen, MultiClassGen, TwoClassGen
 
 from activation_functions.ReLU import ReLU
 from activation_functions.Sigmoid import Sigmoid
