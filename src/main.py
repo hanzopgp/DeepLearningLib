@@ -28,8 +28,8 @@ from utils.utils import *
 ## --> Linear()
 
 ## * Activation functions:
-## --> hidden_layer    : relu, sigmoid, softmax, tanh
-## --> output layer    : sigmoid, softmax
+## --> hidden_layer    : relu, lrelu, sigmoid, softmax, tanh
+## --> output layer    : sigmoid, softmax, linear
 
 ## * Loss functions:
 ## --> classification  : binary_crossentropy, categorical_crossentropy, sparse_binary_crossentropy, sparse_categorical_crossentropy
