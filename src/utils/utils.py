@@ -1,5 +1,7 @@
 import numpy as np
 
+DIVIDE_BY_ZERO_EPS = 1e-9
+
 
 def one_hot(y, n_class):
 	y_copy = y.reshape(-1)
@@ -27,5 +29,5 @@ def split_X(X, train_split=0.2, shuffle=True):
 def min_max_scaler(X, min_input, max_input):
 	max_ = X.max(axis=0)
 	min_ = X.min(axis=0)
-	std_ = (X - min_) / (max_ - min_)
+	std_ = (X - min_) / (max_ - min_ + DIVIDE_BY_ZERO_EPS)
 	return std_ * (max_input - min_input) + min_input

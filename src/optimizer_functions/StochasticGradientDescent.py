@@ -1,3 +1,4 @@
+from re import A
 from Core import *
 from global_imports import *
 
@@ -6,7 +7,7 @@ class StochasticGradientDescent(Optimizer):
 	def __init__(self, net, loss_function, learning_rate, decay):
 		super().__init__()
 		self._net = net
-		self._net.network.append(loss_function)
+		self._net._network.append(loss_function)
 		self._learning_rate = learning_rate
 		self._decay = decay
 
@@ -26,6 +27,7 @@ class StochasticGradientDescent(Optimizer):
 		for cpt_epoch in range(n_epochs):
 			## Stochastic gradient descent
 			for _ in range(n):
+			# for _ in tqdm(range(n)):
 				idx = np.random.choice(n)
 				x_element, y_element = X[idx].reshape(1, -1), y[idx].reshape(1, -1)
 				self._net.forward(x_element, y_element)

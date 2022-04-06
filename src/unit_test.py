@@ -216,7 +216,7 @@ if __name__ == '__main__':
 					X=genCont.x, Y=genCont.y,
 					layers=[
 						(Linear(1, 4), "relu"),
-						(Linear(4, 1), "linear")	# needs linear activation here
+						(Linear(4, 1), "linear")
 					],
 					model_kwargs=None,
 					compile_kwargs=dict(

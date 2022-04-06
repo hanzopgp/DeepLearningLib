@@ -1,7 +1,7 @@
 from Core import *
 
 
-class ReLU(Module):
+class Lin(Module):
 	def zero_grad(self):
 		pass
 	
@@ -10,7 +10,7 @@ class ReLU(Module):
 
 	def forward(self, input):
 		self._input = input
-		self._output = np.maximum(0, self._input)
+		self._output = self._input
 		assert(self._input.shape == self._output.shape)
 
 	def backward_update_gradient(self, delta):
@@ -18,5 +18,5 @@ class ReLU(Module):
 		self._delta = delta
 
 	def backward_delta(self):
-		gradient = np.where(self._input > 0, 1, 0)
+		gradient = np.ones_like(self._input)
 		self._new_delta = gradient * self._delta
