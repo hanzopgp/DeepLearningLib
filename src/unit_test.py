@@ -76,12 +76,12 @@ if __name__ == '__main__':
 	# gen2C.display_data()
 
 	test_params = {
-		# "2 Gaussians, BCE loss, GD": ("binary_crossentropy", "gd"),
-		# "2 Gaussians, BCE loss, SGD": ("binary_crossentropy", "sgd"),
-		# "2 Gaussians, BCE loss, MGD": ("binary_crossentropy", "mgd"),
-		# "2 Gaussians, Sparse BCE loss, GD": ("sparse_binary_crossentropy", "gd"),
-		# "2 Gaussians, Sparse BCE loss, SGD": ("sparse_binary_crossentropy", "sgd"),
-		# "2 Gaussians, Sparse BCE loss, MGD": ("sparse_binary_crossentropy", "mgd")
+		"2 Gaussians, BCE loss, GD": ("binary_crossentropy", "gd"),
+		"2 Gaussians, BCE loss, SGD": ("binary_crossentropy", "sgd"),
+		"2 Gaussians, BCE loss, MGD": ("binary_crossentropy", "mgd"),
+		"2 Gaussians, Sparse BCE loss, GD": ("sparse_binary_crossentropy", "gd"),
+		"2 Gaussians, Sparse BCE loss, SGD": ("sparse_binary_crossentropy", "sgd"),
+		"2 Gaussians, Sparse BCE loss, MGD": ("sparse_binary_crossentropy", "mgd")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -115,12 +115,12 @@ if __name__ == '__main__':
 	gen2C.make_4_gaussians(sigma=0.2)
 	# gen2C.display_data()
 	test_params = {
-		# "4 Gaussians, BCE loss, GD optim": ("binary_crossentropy", "gd"),
-		# "4 Gaussians, BCE loss, SGD optim": ("binary_crossentropy", "sgd"),
-		# "4 Gaussians, BCE loss, MGD optim": ("binary_crossentropy", "mgd"),
-		# "4 Gaussians, Sparse BCE loss, GD optim": ("sparse_binary_crossentropy", "gd"),
-		# "4 Gaussians, Sparse BCE loss, SGD optim": ("sparse_binary_crossentropy", "sgd"),
-		# "4 Gaussians, Sparse BCE loss, MGD optim": ("sparse_binary_crossentropy", "mgd")
+		"4 Gaussians, BCE loss, GD optim": ("binary_crossentropy", "gd"),
+		"4 Gaussians, BCE loss, SGD optim": ("binary_crossentropy", "sgd"),
+		"4 Gaussians, BCE loss, MGD optim": ("binary_crossentropy", "mgd"),
+		"4 Gaussians, Sparse BCE loss, GD optim": ("sparse_binary_crossentropy", "gd"),
+		"4 Gaussians, Sparse BCE loss, SGD optim": ("sparse_binary_crossentropy", "sgd"),
+		"4 Gaussians, Sparse BCE loss, MGD optim": ("sparse_binary_crossentropy", "mgd")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -162,12 +162,12 @@ if __name__ == '__main__':
 	# gen4C.display_data()
 	
 	test_params = {
-		# "Vertical data, CCE, GD optim": ("categorical_crossentropy", "gd"),
-		# "Vertical data, CCE, SGD optim": ("categorical_crossentropy", "sgd"),
-		# "Vertical data, CCE, MGD optim": ("categorical_crossentropy", "mgd"),
-		# "Vertical data, Sparse CCE, GD optim": ("sparse_categorical_crossentropy", "gd"),
-		# "Vertical data, Sparse CCE, SGD optim": ("sparse_categorical_crossentropy", "sgd"),
-		# "Vertical data, Sparse CCE, MGD optim": ("sparse_categorical_crossentropy", "mgd"),
+		"Vertical data, CCE, GD optim": ("categorical_crossentropy", "gd"),
+		"Vertical data, CCE, SGD optim": ("categorical_crossentropy", "sgd"),
+		"Vertical data, CCE, MGD optim": ("categorical_crossentropy", "mgd"),
+		"Vertical data, Sparse CCE, GD optim": ("sparse_categorical_crossentropy", "gd"),
+		"Vertical data, Sparse CCE, SGD optim": ("sparse_categorical_crossentropy", "sgd"),
+		"Vertical data, Sparse CCE, MGD optim": ("sparse_categorical_crossentropy", "mgd"),
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -232,7 +232,8 @@ if __name__ == '__main__':
 				compile_kwargs=dict(
 					loss=loss,
 					optimizer=optim,
-					learning_rate=8e-4
+					#learning_rate=8e-4
+					learning_rate=1e-4 if optim != "mgd" else 1e-5
 				),
 				fit_kwargs=dict(
 					n_epochs=150,

@@ -1,6 +1,6 @@
-from re import A
 from Core import *
 from global_imports import *
+from global_variables import *
 
 
 class StochasticGradientDescent(Optimizer):
@@ -26,8 +26,8 @@ class StochasticGradientDescent(Optimizer):
 		n = X.shape[0]
 		for cpt_epoch in range(n_epochs):
 			## Stochastic gradient descent
-			for _ in range(n):
-			# for _ in tqdm(range(n)):
+			iter = tqdm(range(n)) if TQDM_ACTIVATED else range(n)
+			for _ in iter:
 				idx = np.random.choice(n)
 				x_element, y_element = X[idx].reshape(1, -1), y[idx].reshape(1, -1)
 				self._net.forward(x_element, y_element)

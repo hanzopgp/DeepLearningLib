@@ -4,25 +4,25 @@ from utils.utils import *
 
 ###### ToDoList:
 
-## Debug cases such as nn failing to converge in some situations
 ## Enhance loss/metric computation, avoid forward pass somehow
 ## AutoEncoders (bonus : sharing weight matrixes)
-## Clean early stopping code --> implement it in GD / MGD
-## CNN
+## CNN implem
+## Add f1 score metrics ? Add classification_score ? Add dropout layer ?
 
 
 ###### AutoEncoders ideas: (need to implement at least one and study it)
 
-## Image reconstruction with AutoEncoders ???
+## Image reconstruction with AutoEncoders DONE
+## Classification using latent space given by AutoEncoders DONE
+## Using AutoEncoders to remove noise on data DONE
 ## Represent 2D/3D latent space (bonus : MD latent space with T-sne) ???
-## Using AutoEncoders on noisy data and observing errors ???
-## Classification using latent space given by AutoEncoders ???
 
 
 ##### Implemented: 
 
 ## * Initialization :
-## --> Xavier initialization
+## --> Xavier
+## --> Random
 
 ## * Layers :
 ## --> Linear()

@@ -57,11 +57,11 @@ class Sequential(Module):
 			print("Error : wrong loss function")
 		## Choosing and optimizer function for our network
 		if optimizer == "gd":
-			self.optimizer = GradientDescent(self, loss_function, learning_rate)
+			self.optimizer = GradientDescent(self, loss_function, learning_rate, decay=decay)
 		elif optimizer == "sgd":
 			self.optimizer = StochasticGradientDescent(self, loss_function, learning_rate, decay=decay)
 		elif optimizer == "mgd":
-			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate, n_batch=n_batch)
+			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate, decay=decay, n_batch=n_batch)
 		else:
 			print("Error : wrong optimizer")
 
