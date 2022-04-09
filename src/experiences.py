@@ -2,6 +2,7 @@ from tkinter import Y
 from global_imports import *
 from utils.utils import *
 import tensorflow as tf ## Usefull for datasets
+np.random.seed(42)
 
 
 label_name_fashion_mnist = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
@@ -223,9 +224,9 @@ def remove_noise_autoencoder(dataset, noise_amount):
 		loader = tf.keras.datasets.fashion_mnist
 	elif dataset == "digits_mnist":     
 		loader = tf.keras.datasets.mnist  
-	(X, y), (X_test, y_test) = loader.load_data()
-	size = 5_000
-	X, y, X_test, y_test = X[:size], y[:size], X_test[:size], y_test[:size]
+	(X, _), (X_test, _) = loader.load_data()
+	# size = 30_000
+	# X, X_test = X[:size], X_test[:size]
 	width = X.shape[1]
 	height = X.shape[2]
 	## Reshaping to get linear data in order to use our feed forward model
@@ -242,13 +243,12 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	n_features = X.shape[1]
 	n_classes = X.shape[1]
 	init_type = "xavier"
-	learning_rate = 1e-5
-	decay = 1e-4
+	learning_rate = 1e-4 ## Test 1e-3 comme pr 0.1
+	decay = learning_rate*10
 	regularization_lambda = 1e-9 
 	n_epochs = 100
 	train_split = 0.8
 	early_stopping = {"patience": 10, "metric": "valid_loss", "min_delta": 0.001}
-	# X_train, X_valid, _, _ = split_data(X, y, train_split=train_split, shuffle=True)
 	X_train_noise, X_valid_noise = split_X(X_noise, train_split=train_split, shuffle=False)
 	X_train, X_valid = split_X(X, train_split=train_split, shuffle=False)
 	## Building and training autoencoder model
@@ -258,10 +258,18 @@ def remove_noise_autoencoder(dataset, noise_amount):
 						   init_type=init_type, 
 						   regularization_lambda=regularization_lambda), activation="tanh")
 	model.add(layer=Linear(256, 
-						   64, 
+						   180, 
 						   init_type=init_type, 
 						   regularization_lambda=regularization_lambda), activation="tanh")
-	model.add(layer=Linear(64, 
+	model.add(layer=Linear(180, 
+						   128, 
+						   init_type=init_type, 
+						   regularization_lambda=regularization_lambda), activation="tanh")
+	model.add(layer=Linear(128, 
+						   180, 
+						   init_type=init_type, 
+						   regularization_lambda=regularization_lambda), activation="tanh")
+	model.add(layer=Linear(180, 
 						   256, 
 						   init_type=init_type, 
 						   regularization_lambda=regularization_lambda), activation="tanh")
@@ -306,4 +314,4 @@ def remove_noise_autoencoder(dataset, noise_amount):
 
 ## Autoencoder to remove noise 
 # remove_noise_autoencoder("fashion_mnist", 0.1)
-remove_noise_autoencoder("digits_mnist", 0.1)
+remove_noise_autoencoder("digits_mnist", 0.6)
