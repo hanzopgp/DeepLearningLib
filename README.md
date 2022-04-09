@@ -56,7 +56,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
 
 ## Experiences made
 
-> All those experiments were done on MNIST digits and fashion datasets.
+All those experiments were done on MNIST digits and fashion datasets :
 - Multi layer perceptron image classification
 - Autoencoder image reconstruction (with different latent space dimensions)
 - Autoencoder removing noise (with different percentage of noise)
