@@ -2,7 +2,6 @@ from Core import *
 from global_imports import *
 from global_variables import *
 
-
 # Source: https://math.stackexchange.com/questions/2503428/derivative-of-binary-cross-entropy-why-are-my-signs-not-right
 
 

@@ -5,7 +5,6 @@ from utils.utils import *
 ###### ToDoList:
 
 ## Enhance loss/metric computation, avoid forward pass somehow
-## AutoEncoders (bonus : sharing weight matrixes)
 ## CNN implem
 ## Add f1 score metrics ? Add classification_score ? Add dropout layer ?
 
@@ -15,7 +14,6 @@ from utils.utils import *
 ## Image reconstruction with AutoEncoders DONE
 ## Classification using latent space given by AutoEncoders DONE
 ## Using AutoEncoders to remove noise on data DONE
-## Represent 2D/3D latent space (bonus : MD latent space with T-sne) ???
 
 
 ##### Implemented: 
@@ -25,7 +23,7 @@ from utils.utils import *
 ## --> Random
 
 ## * Layers :
-## --> Linear()
+## --> Linear
 
 ## * Activation functions:
 ## --> hidden_layer    : relu, lrelu, sigmoid, tanh

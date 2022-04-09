@@ -14,7 +14,7 @@ class Sequential(Module):
 
 	############################################### USER FUNCTIONS ###############################################
 
-	def add(self, layer, activation):
+	def add(self, layer, activation=None):
 		self._network.append(layer)
 		if activation == "relu":
 			self._network.append(ReLU())
@@ -28,8 +28,6 @@ class Sequential(Module):
 			self._network.append(Lin())
 		elif activation == "lrelu":
 			self._network.append(LeakyReLU())
-		else:
-			print("Error : wrong activation function")
 
 	def compile(self, loss, optimizer="sgd", learning_rate=1e-3, metric=None, n_batch=20, decay=1e-6):
 		## Choosing a metric
@@ -216,7 +214,11 @@ class Sequential(Module):
 			type_ = str(type(m))
 			element = type_.split(".")[-1][:-2]
 			if "layers" in type_:
-				print("--> Layer", int(i/2), ":", element, "with parameters_shape =", m._parameters.shape, end="")
+				if "Dropout" in type_:
+					print("--> Layer", int(i/2), ":", element, "with rate =", m._rate)
+					i += 1
+				else:
+					print("--> Layer", int(i/2), ":", element, "with parameters_shape =", m._parameters.shape, end="")
 			elif "activation_functions" in type_:
 				print(" and activation :", element)
 			elif "loss_functions" in type_:
@@ -230,6 +232,8 @@ class Sequential(Module):
 	def count_parameters(self):
 		res = 0
 		for m in self._network:
-			if "layers" in str(type(m)):
-				res += m._parameters.size + m._bias.size
+			type_ = str(type(m))
+			if "layers" in type_:
+				if "Dropout" not in type_:
+					res += m._parameters.size + m._bias.size
 		return res

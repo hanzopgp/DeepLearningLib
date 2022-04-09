@@ -225,8 +225,8 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	elif dataset == "digits_mnist":     
 		loader = tf.keras.datasets.mnist  
 	(X, _), (X_test, _) = loader.load_data()
-	# size = 30_000
-	# X, X_test = X[:size], X_test[:size]
+	size = 3_000
+	X, X_test = X[:size], X_test[:size]
 	width = X.shape[1]
 	height = X.shape[2]
 	## Reshaping to get linear data in order to use our feed forward model
@@ -261,6 +261,7 @@ def remove_noise_autoencoder(dataset, noise_amount):
 						   180, 
 						   init_type=init_type, 
 						   regularization_lambda=regularization_lambda), activation="relu")
+	model.add(layer=Dropout(rate=0.1))
 	model.add(layer=Linear(180, 
 						   128, 
 						   init_type=init_type, 
@@ -310,7 +311,7 @@ def remove_noise_autoencoder(dataset, noise_amount):
 
 ## Autoencoder reconstruction + classification with latent space
 # reconstruction_mlp("fashion_mnist", 16)
-# reconstruction_mlp("digits_mnist", 8) ## RETRY WITH 8 need train.png and network.png
+# reconstruction_mlp("digits_mnist", 8)
 
 ## Autoencoder to remove noise 
 # remove_noise_autoencoder("fashion_mnist", 0.1)

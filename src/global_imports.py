@@ -28,4 +28,6 @@ from optimizer_functions.StochasticGradientDescent import StochasticGradientDesc
 from optimizer_functions.MinibatchGradientDescent import MinibatchGradientDescent
 
 from layers.Linear import Linear
+from layers.Dropout import Dropout
+
 from network.Sequential import Sequential
