@@ -48,3 +48,16 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       ├── README.md		          
       └── LICENSE  
 </pre></code>
+
+## Implementation not seen in Project architecture
+
+- Xavier initialization
+- L2 regularisation
+
+## Experiences made
+
+> All those experiments were done on MNIST digits and fashion datasets.
+- Multi layer perceptron image classification
+- Autoencoder image reconstruction (with different latent space dimensions)
+- Autoencoder removing noise (with different percentage of noise)
+- Multi layer perceptron image classification with latent space representation (using different dimension)
