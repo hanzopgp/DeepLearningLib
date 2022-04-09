@@ -32,7 +32,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    |      ├── SparseCategoricalCrossEntropy.py
       |    |      └── SparseCategoricalCrossEntropySoftmax.py
       |    ├── network/               (Folder containing sequential module)
-      |    |      ├── Sequential.py
+      |    |      └── Sequential.py
       |    ├── optimizer_functions/   (Folder containing optimizer functions such as SGD)
       |    |      ├── GradientDescent.py
       |    |      ├── MinibatchGradientDescent.py
