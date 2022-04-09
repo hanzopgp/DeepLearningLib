@@ -243,12 +243,12 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	n_features = X.shape[1]
 	n_classes = X.shape[1]
 	init_type = "xavier"
-	learning_rate = 1e-4 ## Test 1e-3 comme pr 0.1
+	learning_rate = 5e-5 ## Test 1e-3 comme pr 0.1
 	decay = learning_rate*10
 	regularization_lambda = 1e-9 
 	n_epochs = 100
 	train_split = 0.8
-	early_stopping = {"patience": 10, "metric": "valid_loss", "min_delta": 0.001}
+	early_stopping = {"patience": 15, "metric": "valid_loss", "min_delta": 0.001}
 	X_train_noise, X_valid_noise = split_X(X_noise, train_split=train_split, shuffle=False)
 	X_train, X_valid = split_X(X, train_split=train_split, shuffle=False)
 	## Building and training autoencoder model
@@ -314,4 +314,4 @@ def remove_noise_autoencoder(dataset, noise_amount):
 
 ## Autoencoder to remove noise 
 # remove_noise_autoencoder("fashion_mnist", 0.1)
-remove_noise_autoencoder("digits_mnist", 0.7)
+remove_noise_autoencoder("digits_mnist", 0.8)
