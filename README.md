@@ -6,8 +6,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
 
 ## Project architecture
 
-<pre><code>
-DeepLearningLib/
+<pre><code>DeepLearningLib/
       ├── src/                   
       |    ├── activation_functions/  (Folder containing activation functions)
       |    |      ├── LeakyRELU.py
