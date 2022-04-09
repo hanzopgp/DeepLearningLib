@@ -7,7 +7,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
 ## Project architecture
 
 <pre><code>
-JetsonAutonomousDriving/
+DeepLearningLib/
       ├── src/                   
       |    ├── activation_functions/  (Folder containing activation functions)
       |    ├── data/                  (Folder containing data generation functions)
