@@ -54,7 +54,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
 - Xavier initialization
 - L2 regularisation
 
-## Experiences made
+## Experiences
 
 All those experiments were done on MNIST digits and fashion datasets :
 - Multi layer perceptron image classification
