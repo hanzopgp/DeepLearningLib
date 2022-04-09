@@ -256,23 +256,23 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	model.add(layer=Linear(n_features, 
 						   256, 
 						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
+						   regularization_lambda=regularization_lambda), activation="relu")
 	model.add(layer=Linear(256, 
 						   180, 
 						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
+						   regularization_lambda=regularization_lambda), activation="relu")
 	model.add(layer=Linear(180, 
 						   128, 
 						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
+						   regularization_lambda=regularization_lambda), activation="relu")
 	model.add(layer=Linear(128, 
 						   180, 
 						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
+						   regularization_lambda=regularization_lambda), activation="relu")
 	model.add(layer=Linear(180, 
 						   256, 
 						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
+						   regularization_lambda=regularization_lambda), activation="relu")
 	model.add(layer=Linear(256, 
 						   n_classes, 
 						   init_type=init_type, 
@@ -314,4 +314,4 @@ def remove_noise_autoencoder(dataset, noise_amount):
 
 ## Autoencoder to remove noise 
 # remove_noise_autoencoder("fashion_mnist", 0.1)
-remove_noise_autoencoder("digits_mnist", 0.6)
+remove_noise_autoencoder("digits_mnist", 0.7)
