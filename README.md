@@ -19,6 +19,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    |      └── DataGeneration.py
       |    ├── layers/                (Folder contraining linear, conv1d... layers)
       |    |      ├── Linear.py
+	  |    |      ├── Dropout.py	
       |    |      ├── Conv1D.py
       |    |      ├── MaxPool.py
       |    |      └── Flatten.py
@@ -37,6 +38,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    |      ├── GradientDescent.py
       |    |      ├── MinibatchGradientDescent.py
       |    |      └── StochasticGradientDescent.py
+      |    |      └── Adam.py
       |    ├── utils/                 (Folder containing utility functions such as split_data())
       |    |      └── utils.py
       |    ├── Core.py                (File containing abstract classes such as Modules/Loss/Optimizer)
@@ -45,6 +47,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    ├── global_variables.py    (File containing all the global static variables)
       |    ├── main.py                (Main file containing the demo)
       |    └── unit_test.py           (Test file containing unit tests on easy problems) 
+	  ├── report/                     (Folder containing the images and latex files for the report)	
       ├── README.md		          
       └── LICENSE  
 </pre></code>

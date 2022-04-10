@@ -316,3 +316,7 @@ classification_mlp("digits_mnist")
 ## Autoencoder to remove noise 
 # remove_noise_autoencoder("fashion_mnist", 0.1)
 # remove_noise_autoencoder("digits_mnist", 0.8)
+
+## Classic classification with a CNN model
+# classification_cnn("fashion_mnist")
+# classification_cnn("digits_mnist")
