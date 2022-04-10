@@ -26,7 +26,7 @@ class Dropout(Module):
 
 	def backward_update_gradient(self, delta):
 		assert(delta.shape == self._output.shape)
-		assert(delta.shape[0] == self._input.shape[0])
+		assert(de	lta.shape[0] == self._input.shape[0])
 		self._delta = delta
 		
 	def backward_delta(self):
