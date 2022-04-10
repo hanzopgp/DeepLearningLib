@@ -13,6 +13,16 @@ class MinibatchGradientDescent(Optimizer):
 		self._n_batch = n_batch
 
 	def step(self, X, y, n_epochs, verbose, early_stopping):
+		## Variables for early stopping
+		if early_stopping is not None:
+			best_cpt_epoch = 0
+			best_model = self._net
+			best_valid_loss = np.inf
+			best_train_loss = np.inf
+			best_valid_acc = 0
+			best_train_acc = 0
+			cpt_patience = 0
+			
 		minibatches_x, minibatches_y = self.build_minibatches(X, y)
 		n = minibatches_x.shape[0]
 		for cpt_epoch in range(n_epochs):

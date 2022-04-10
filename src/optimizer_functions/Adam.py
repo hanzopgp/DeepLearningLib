@@ -1,15 +1,22 @@
+from pyparsing import alphanums
 from Core import *
 from global_imports import *
 from global_variables import *
 
 
-class GradientDescent(Optimizer):
-	def __init__(self, net, loss_function, learning_rate, decay):
+class Adam(Optimizer):
+	def __init__(self, net, loss_function, learning_rate, b1=0.9, b2=0.999, alpha=1e-3, n=1e-8):
 		super().__init__()
 		self._net = net
 		self._net._network.append(loss_function)
-		self._decay = decay
 		self._learning_rate = learning_rate
+		## ADAM parameters
+		self._m = 0
+		self._v = 0
+		self._b1 = b1
+		self._b2 = b2
+		self._alpha = alpha
+		self._n = n
 
 	def step(self, X, y, n_epochs, verbose, early_stopping):
 		## Variables for early stopping
@@ -21,15 +28,30 @@ class GradientDescent(Optimizer):
 			best_valid_acc = 0
 			best_train_acc = 0
 			cpt_patience = 0
-			
-		for cpt_epoch in range(n_epochs):
-			self._net.forward(X, y)
-			self._net.backward()
-			self._net.update_parameters(self._learning_rate)
-			self._net.update_stats()
 
-			## Learning rate computation with decay with respect to cpt_epoch
-			self._learning_rate  *= (1. / (1. + self._decay * cpt_epoch))
+		## Epoch loop : one epoch means we trained on the whole dataset once
+		n = X.shape[0]
+		for cpt_epoch in range(n_epochs):
+			## Stochastic gradient descent
+			iter = tqdm(range(n)) if TQDM_ACTIVATED else range(n)
+			for _ in iter:
+				idx = np.random.choice(n)
+				x_element, y_element = X[idx].reshape(1, -1), y[idx].reshape(1, -1)
+				self._net.forward(x_element, y_element)
+				self._net.backward()
+				## With our implementation we can't use update_parameters() from sequential module
+				## We need to update the parameters in ADAM optimizer
+				for layer in self._net._network:
+					try: ## Only apply ADAM on layers with parameters
+						grad_p = layer._gradient
+						self._m = self._b1 * self._m + (1 - self._b1) * grad_p
+						self._v = self._b2 * self._v + (1 - self._b2) * np.power(grad_p, 2)
+						m_hat = self._m / (1 - self._b1)
+						v_hat = self._v / (1 - self._b2)
+						w_update = self._learning_rate * m_hat / (np.sqrt(v_hat) + self._n)
+						layer._parameters -= w_update
+					except:
+						continue
 
 			## Updating the model stats
 			train_loss, train_acc, valid_loss, valid_acc = self._net.update_stats()
@@ -89,3 +111,17 @@ class GradientDescent(Optimizer):
 							self._net = best_model
 							print("--> Early stopping triggered and best model saved from epoch number", best_cpt_epoch)
 							break
+
+# @jit(nopython=True, parallel=True, fastmath=True)
+# def _adam(network, m, v, b1, b2, learning_rate, n):
+# 	for layer in network:
+# 		try: ## Only apply ADAM on layers with parameters
+# 			grad_p = layer._gradient
+# 			m = b1 * m + (1 - b1) * grad_p
+# 			v = b2 * v + (1 - b2) * np.power(grad_p, 2)
+# 			m_hat = m / (1 - b1)
+# 			v_hat = v / (1 - b2)
+# 			w_update = learning_rate * m_hat / (np.sqrt(v_hat) + n)
+# 			layer._parameters -= w_update
+# 		except:
+# 			continue

@@ -28,8 +28,8 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 	train_split = 0.8
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
-	# size = 10_000
-	# X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
+	size = 10_000
+	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 	## Building and training model
 	model = Sequential()
 	if not latent: ## Normal classification on 728 features MNIST
@@ -63,7 +63,7 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 							init_type=init_type, 
 							regularization_lambda=regularization_lambda), activation="softmax")	
 	model.compile(loss="sparse_categorical_crossentropy", 
-				  optimizer="sgd",
+				  optimizer="adam",
 				  learning_rate=learning_rate,
 				  metric="accuracy",
 				  decay=decay)
@@ -307,7 +307,7 @@ def remove_noise_autoencoder(dataset, noise_amount):
 
 ## Classic classification with a MLP model
 # classification_mlp("fashion_mnist")
-# classification_mlp("digits_mnist")
+classification_mlp("digits_mnist")
 
 ## Autoencoder reconstruction + classification with latent space
 # reconstruction_mlp("fashion_mnist", 16)
@@ -315,4 +315,4 @@ def remove_noise_autoencoder(dataset, noise_amount):
 
 ## Autoencoder to remove noise 
 # remove_noise_autoencoder("fashion_mnist", 0.1)
-remove_noise_autoencoder("digits_mnist", 0.8)
+# remove_noise_autoencoder("digits_mnist", 0.8)

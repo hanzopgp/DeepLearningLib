@@ -22,7 +22,7 @@ class StochasticGradientDescent(Optimizer):
 			best_train_acc = 0
 			cpt_patience = 0
 
-		## Epoch loop : one epoch means we trained on the whole dataset
+		## Epoch loop : one epoch means we trained on the whole dataset once
 		n = X.shape[0]
 		for cpt_epoch in range(n_epochs):
 			## Stochastic gradient descent

@@ -60,6 +60,8 @@ class Sequential(Module):
 			self.optimizer = StochasticGradientDescent(self, loss_function, learning_rate, decay=decay)
 		elif optimizer == "mgd":
 			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate, decay=decay, n_batch=n_batch)
+		elif optimizer == "adam":
+			self.optimizer = Adam(self, loss_function, learning_rate)
 		else:
 			print("Error : wrong optimizer")
 
@@ -198,14 +200,13 @@ class Sequential(Module):
 		## Show accuracy per epochs
 		la_train = np.array(self._train_acc_values)
 		la_valid = np.array(self._valid_acc_values)
-		if len(la_train) <= 1: ## Don't show this metric if not classification
-			plt.plot(la_train, label="train")
-			plt.plot(la_valid, label="valid")
-			plt.legend(loc="lower right")
-			plt.ylabel('Accuracy')
-			plt.xlabel('Epochs')
-			plt.title("Accuracy per epochs")
-			plt.show()
+		plt.plot(la_train, label="train")
+		plt.plot(la_valid, label="valid")
+		plt.legend(loc="lower right")
+		plt.ylabel('Accuracy')
+		plt.xlabel('Epochs')
+		plt.title("Accuracy per epochs")
+		plt.show()
 
 	def summary(self):
 		print("====================================================================================")

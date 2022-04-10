@@ -2,6 +2,7 @@ import numpy as np
 # np.random.seed(42)
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+from numba import jit
 
 import global_variables
 
@@ -26,6 +27,7 @@ from loss_functions.SparseCategoricalCrossEntropySoftmax import SparseCategorica
 from optimizer_functions.GradientDescent import GradientDescent
 from optimizer_functions.StochasticGradientDescent import StochasticGradientDescent
 from optimizer_functions.MinibatchGradientDescent import MinibatchGradientDescent
+from optimizer_functions.Adam import Adam
 
 from layers.Linear import Linear
 from layers.Dropout import Dropout
