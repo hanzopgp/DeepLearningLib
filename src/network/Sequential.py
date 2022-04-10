@@ -61,7 +61,7 @@ class Sequential(Module):
 		elif optimizer == "mgd":
 			self.optimizer = MinibatchGradientDescent(self, loss_function, learning_rate, decay=decay, n_batch=n_batch)
 		elif optimizer == "adam":
-			self.optimizer = Adam(self, loss_function, learning_rate)
+			self.optimizer = Adam(self, loss_function, learning_rate, decay=decay)
 		else:
 			print("Error : wrong optimizer")
 

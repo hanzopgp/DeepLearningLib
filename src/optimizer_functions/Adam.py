@@ -5,11 +5,15 @@ from global_variables import *
 
 
 class Adam(Optimizer):
-	def __init__(self, net, loss_function, learning_rate, b1=0.9, b2=0.999, alpha=1e-3, n=1e-8):
+	def __init__(self, net, loss_function, learning_rate, decay, b1=0.9, b2=0.999, alpha=1e-3, n=1e-8):
 		super().__init__()
 		self._net = net
 		self._net._network.append(loss_function)
+		## ADAM doesn't mutate the learning rate, its adaptability affects the weights
+		## but the learning rate value doesn't change over time. This is why we can keep
+		## using a decay with ADAM. The decay changes the value which is the maximum threshold
 		self._learning_rate = learning_rate
+		self._decay = decay
 		## ADAM parameters
 		self._m = 0
 		self._v = 0
@@ -43,6 +47,7 @@ class Adam(Optimizer):
 				## We need to update the parameters in ADAM optimizer
 				for layer in self._net._network:
 					try: ## Only apply ADAM on layers with parameters
+						## Update weights
 						grad_p = layer._gradient
 						self._m = self._b1 * self._m + (1 - self._b1) * grad_p
 						self._v = self._b2 * self._v + (1 - self._b2) * np.power(grad_p, 2)
@@ -50,8 +55,19 @@ class Adam(Optimizer):
 						v_hat = self._v / (1 - self._b2)
 						w_update = self._learning_rate * m_hat / (np.sqrt(v_hat) + self._n)
 						layer._parameters -= w_update
+						## Update bias
+						grad_b = layer._gradient_bias
+						self._m = self._b1 * self._m + (1 - self._b1) * grad_b
+						self._v = self._b2 * self._v + (1 - self._b2) * np.power(grad_b, 2)
+						m_hat = self._m / (1 - self._b1)
+						v_hat = self._v / (1 - self._b2)
+						b_update = self._learning_rate * m_hat / (np.sqrt(v_hat) + self._n)
+						layer._bias -= b_update
 					except:
 						continue
+			
+			## Learning rate computation with decay with respect to cpt_epoch
+			self._learning_rate  *= (1. / (1. + self._decay * cpt_epoch))
 
 			## Updating the model stats
 			train_loss, train_acc, valid_loss, valid_acc = self._net.update_stats()

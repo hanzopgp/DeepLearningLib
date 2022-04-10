@@ -24,6 +24,7 @@ from utils.utils import *
 
 ## * Layers :
 ## --> Linear
+## --> Dropout
 
 ## * Activation functions:
 ## --> hidden_layer    : relu, lrelu, sigmoid, tanh
@@ -36,6 +37,7 @@ from utils.utils import *
 
 ## * Optimizer functions:
 ## --> basic optimizer : gd, sgd, mgd
+## --> adaptative optimizer : adam
 
 ## * Score types:
 ## --> classification : accuracy

@@ -18,8 +18,8 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    ├── data/                  (Folder containing data generation functions)
       |    |      └── DataGeneration.py
       |    ├── layers/                (Folder contraining linear, conv1d... layers)
+	  |	   |	  ├── Dropout.py
       |    |      ├── Linear.py
-	  |    |      ├── Dropout.py	
       |    |      ├── Conv1D.py
       |    |      ├── MaxPool.py
       |    |      └── Flatten.py
@@ -35,10 +35,10 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    ├── network/               (Folder containing sequential module)
       |    |      └── Sequential.py
       |    ├── optimizer_functions/   (Folder containing optimizer functions such as SGD)
+	  |    |      ├── Adam.py
       |    |      ├── GradientDescent.py
       |    |      ├── MinibatchGradientDescent.py
       |    |      └── StochasticGradientDescent.py
-      |    |      └── Adam.py
       |    ├── utils/                 (Folder containing utility functions such as split_data())
       |    |      └── utils.py
       |    ├── Core.py                (File containing abstract classes such as Modules/Loss/Optimizer)
