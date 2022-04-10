@@ -3,9 +3,11 @@ from Core import *
 from global_imports import *
 from global_variables import *
 
+# Source: https://arxiv.org/pdf/1412.6980.pdf
+
 
 class Adam(Optimizer):
-	def __init__(self, net, loss_function, learning_rate, decay, b1=0.9, b2=0.999, alpha=1e-3, n=1e-8):
+	def __init__(self, net, loss_function, learning_rate, decay, b1=0.9, b2=0.999, alpha=1e-3, eps=1e-8):
 		super().__init__()
 		self._net = net
 		self._net._network.append(loss_function)
@@ -15,12 +17,14 @@ class Adam(Optimizer):
 		self._learning_rate = learning_rate
 		self._decay = decay
 		## ADAM parameters
-		self._m = 0
-		self._v = 0
+		self._mw = 0
+		self._vw = 0
+		self._mb = 0
+		self._vb = 0
 		self._b1 = b1
 		self._b2 = b2
 		self._alpha = alpha
-		self._n = n
+		self._eps = eps
 
 	def step(self, X, y, n_epochs, verbose, early_stopping):
 		## Variables for early stopping
@@ -35,10 +39,11 @@ class Adam(Optimizer):
 
 		## Epoch loop : one epoch means we trained on the whole dataset once
 		n = X.shape[0]
-		for cpt_epoch in range(n_epochs):
+		for cpt_epoch in range(1, n_epochs+1):
 			## Stochastic gradient descent
 			iter = tqdm(range(n)) if TQDM_ACTIVATED else range(n)
 			for _ in iter:
+				## Classic SGD start
 				idx = np.random.choice(n)
 				x_element, y_element = X[idx].reshape(1, -1), y[idx].reshape(1, -1)
 				self._net.forward(x_element, y_element)
@@ -47,22 +52,28 @@ class Adam(Optimizer):
 				## We need to update the parameters in ADAM optimizer
 				for layer in self._net._network:
 					try: ## Only apply ADAM on layers with parameters
-						## Update weights
-						grad_p = layer._gradient
-						self._m = self._b1 * self._m + (1 - self._b1) * grad_p
-						self._v = self._b2 * self._v + (1 - self._b2) * np.power(grad_p, 2)
-						m_hat = self._m / (1 - self._b1)
-						v_hat = self._v / (1 - self._b2)
-						w_update = self._learning_rate * m_hat / (np.sqrt(v_hat) + self._n)
-						layer._parameters -= w_update
-						## Update bias
+						## Get layer gradients
+						grad_w = layer._gradient
 						grad_b = layer._gradient_bias
-						self._m = self._b1 * self._m + (1 - self._b1) * grad_b
-						self._v = self._b2 * self._v + (1 - self._b2) * np.power(grad_b, 2)
-						m_hat = self._m / (1 - self._b1)
-						v_hat = self._v / (1 - self._b2)
-						b_update = self._learning_rate * m_hat / (np.sqrt(v_hat) + self._n)
+						## Compute momentums
+						self._mw = self._b1 * self._mw + (1 - self._b1) * grad_w
+						self._vw = self._b2 * self._vw + (1 - self._b2) * np.power(grad_w, 2)
+						self._mb = self._b1 * self._mb + (1 - self._b1) * grad_b
+						self._vb = self._b2 * self._vb + (1 - self._b2) * np.power(grad_b, 2)
+						## Compute corrections
+						mw_hat = self._mw / (1 - self._b1 ** cpt_epoch)
+						vw_hat = self._vw / (1 - self._b2 ** cpt_epoch)
+						mb_hat = self._mb / (1 - self._b1 ** cpt_epoch)
+						vb_hat = self._vb / (1 - self._b2 ** cpt_epoch)
+						## Compute update value
+						w_update = self._learning_rate * mw_hat / (np.sqrt(np.where(vw_hat>0, vw_hat, 0)) + self._eps)
+						b_update = self._learning_rate * mb_hat / (np.sqrt(np.where(vb_hat>0, vb_hat, 0)) + self._eps)
+						## Update parameters
+						layer._parameters -= w_update
 						layer._bias -= b_update
+						## Reset gradients
+						layer._gradient = np.zeros_like(grad_w)
+						layer._gradient_bias = np.zeros_like(grad_b)
 					except:
 						continue
 			
@@ -127,17 +138,3 @@ class Adam(Optimizer):
 							self._net = best_model
 							print("--> Early stopping triggered and best model saved from epoch number", best_cpt_epoch)
 							break
-
-# @jit(nopython=True, parallel=True, fastmath=True)
-# def _adam(network, m, v, b1, b2, learning_rate, n):
-# 	for layer in network:
-# 		try: ## Only apply ADAM on layers with parameters
-# 			grad_p = layer._gradient
-# 			m = b1 * m + (1 - b1) * grad_p
-# 			v = b2 * v + (1 - b2) * np.power(grad_p, 2)
-# 			m_hat = m / (1 - b1)
-# 			v_hat = v / (1 - b2)
-# 			w_update = learning_rate * m_hat / (np.sqrt(v_hat) + n)
-# 			layer._parameters -= w_update
-# 		except:
-# 			continue

@@ -23,18 +23,18 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 	n_classes = len(np.unique(y))	
 	init_type = "xavier"
 	learning_rate = 1e-4
-	decay = learning_rate * 10
+	decay = learning_rate * 5
 	regularization_lambda = 1e-9
 	train_split = 0.8
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
-	size = 10_000
-	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
+	# size = 3_000
+	# X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 	## Building and training model
 	model = Sequential()
 	if not latent: ## Normal classification on 728 features MNIST
 		n_epochs = 100
-		early_stopping = {"patience": 5, "metric": "valid_loss", "min_delta": 0.001}
+		early_stopping = {"patience": 10, "metric": "valid_loss", "min_delta": 0.001}
 		model.add(layer=Linear(n_features, 
 							256, 
 							init_type=init_type, 

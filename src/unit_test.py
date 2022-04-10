@@ -79,9 +79,11 @@ if __name__ == '__main__':
 		"2 Gaussians, BCE loss, GD": ("binary_crossentropy", "gd"),
 		"2 Gaussians, BCE loss, SGD": ("binary_crossentropy", "sgd"),
 		"2 Gaussians, BCE loss, MGD": ("binary_crossentropy", "mgd"),
+		"2 Gaussians, BCE loss, ADAM": ("binary_crossentropy", "adam"),
 		"2 Gaussians, Sparse BCE loss, GD": ("sparse_binary_crossentropy", "gd"),
 		"2 Gaussians, Sparse BCE loss, SGD": ("sparse_binary_crossentropy", "sgd"),
-		"2 Gaussians, Sparse BCE loss, MGD": ("sparse_binary_crossentropy", "mgd")
+		"2 Gaussians, Sparse BCE loss, MGD": ("sparse_binary_crossentropy", "mgd"),
+		"2 Gaussians, Sparse BCE loss, ADAM": ("sparse_binary_crossentropy", "adam")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -118,9 +120,11 @@ if __name__ == '__main__':
 		"4 Gaussians, BCE loss, GD optim": ("binary_crossentropy", "gd"),
 		"4 Gaussians, BCE loss, SGD optim": ("binary_crossentropy", "sgd"),
 		"4 Gaussians, BCE loss, MGD optim": ("binary_crossentropy", "mgd"),
+		"4 Gaussians, BCE loss, ADAM optim": ("binary_crossentropy", "adam"),
 		"4 Gaussians, Sparse BCE loss, GD optim": ("sparse_binary_crossentropy", "gd"),
 		"4 Gaussians, Sparse BCE loss, SGD optim": ("sparse_binary_crossentropy", "sgd"),
-		"4 Gaussians, Sparse BCE loss, MGD optim": ("sparse_binary_crossentropy", "mgd")
+		"4 Gaussians, Sparse BCE loss, MGD optim": ("sparse_binary_crossentropy", "mgd"),
+		"4 Gaussians, Sparse BCE loss, ADAM optim": ("sparse_binary_crossentropy", "adam")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -165,9 +169,11 @@ if __name__ == '__main__':
 		"Vertical data, CCE, GD optim": ("categorical_crossentropy", "gd"),
 		"Vertical data, CCE, SGD optim": ("categorical_crossentropy", "sgd"),
 		"Vertical data, CCE, MGD optim": ("categorical_crossentropy", "mgd"),
+		"Vertical data, CCE, ADAM optim": ("categorical_crossentropy", "adam"),
 		"Vertical data, Sparse CCE, GD optim": ("sparse_categorical_crossentropy", "gd"),
 		"Vertical data, Sparse CCE, SGD optim": ("sparse_categorical_crossentropy", "sgd"),
 		"Vertical data, Sparse CCE, MGD optim": ("sparse_categorical_crossentropy", "mgd"),
+		"Vertical data, Sparse CCE, ADAM optim": ("sparse_categorical_crossentropy", "adam")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -210,7 +216,8 @@ if __name__ == '__main__':
 	params_optim = [
 		"gd",
 		"sgd",
-		"mgd"
+		"mgd",
+		"adam"
 	]
 	params_loss = [
 		"mse",

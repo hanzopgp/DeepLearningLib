@@ -24,7 +24,7 @@ class StochasticGradientDescent(Optimizer):
 
 		## Epoch loop : one epoch means we trained on the whole dataset once
 		n = X.shape[0]
-		for cpt_epoch in range(n_epochs):
+		for cpt_epoch in range(1, n_epochs+1):
 			## Stochastic gradient descent
 			iter = tqdm(range(n)) if TQDM_ACTIVATED else range(n)
 			for _ in iter:

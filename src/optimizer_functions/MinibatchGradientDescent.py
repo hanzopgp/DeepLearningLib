@@ -25,7 +25,7 @@ class MinibatchGradientDescent(Optimizer):
 			
 		minibatches_x, minibatches_y = self.build_minibatches(X, y)
 		n = minibatches_x.shape[0]
-		for cpt_epoch in range(n_epochs):
+		for cpt_epoch in range(1, n_epochs+1):
 			iter = tqdm(range(n)) if TQDM_ACTIVATED else range(n)
 			for _ in iter:
 				idx = np.random.randint(n)

@@ -22,7 +22,7 @@ class GradientDescent(Optimizer):
 			best_train_acc = 0
 			cpt_patience = 0
 			
-		for cpt_epoch in range(n_epochs):
+		for cpt_epoch in range(1, n_epochs+1):
 			self._net.forward(X, y)
 			self._net.backward()
 			self._net.update_parameters(self._learning_rate)
