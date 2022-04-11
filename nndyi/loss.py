@@ -1,9 +1,10 @@
 import numpy as np
-from core import Loss, MIN_THRESHOLD, MAX_THRESHOLD, DIVIDE_BY_ZERO_EPS
+import core
+from core import DIVIDE_BY_ZERO_EPS, MIN_THRESHOLD, MAX_THRESHOLD
 from utils import one_hot
 
 
-class BinaryCrossEntropy(Loss):
+class BinaryCrossEntropy(core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = np.where(prediction < MIN_THRESHOLD, MIN_THRESHOLD, prediction)
@@ -21,7 +22,7 @@ class SparseBinaryCrossEntropy(BinaryCrossEntropy):
 		super().forward(one_hot(truth, prediction.shape[1]), prediction)
 
 
-class CategoricalCrossEntropy(Loss):
+class CategoricalCrossEntropy(core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = prediction
@@ -36,7 +37,7 @@ class SparseCategoricalCrossEntropy(CategoricalCrossEntropy):
 		super().forward(one_hot(truth, prediction.shape[1]), prediction)
 
 
-class SparseCategoricalCrossEntropySoftmax(Loss):
+class SparseCategoricalCrossEntropySoftmax(core.Loss):
 	def forward(self, truth, prediction):
 		self._y = one_hot(truth, prediction.shape[1])
 		self._yhat = np.where(prediction < MIN_THRESHOLD, MIN_THRESHOLD, prediction)
@@ -49,7 +50,7 @@ class SparseCategoricalCrossEntropySoftmax(Loss):
 		self._new_delta = _exp / (np.sum(_exp, axis=1).reshape((-1, 1)) + DIVIDE_BY_ZERO_EPS) - self._y
 
 
-class MeanAbsoluteError(Loss):
+class MeanAbsoluteError(core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = prediction
@@ -59,7 +60,7 @@ class MeanAbsoluteError(Loss):
 		self._new_delta = np.where(self._yhat > self._y, 1, -1)
 
 
-class MeanSquaredError(Loss):
+class MeanSquaredError(core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = prediction
@@ -69,7 +70,7 @@ class MeanSquaredError(Loss):
 		self._new_delta = -2 * (self._y - self._yhat)
 
 
-class RootMeanSquaredError(Loss):
+class RootMeanSquaredError(core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = prediction
