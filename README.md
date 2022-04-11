@@ -18,7 +18,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    ├── data/                  (Folder containing data generation functions)
       |    |      └── DataGeneration.py
       |    ├── layers/                (Folder contraining linear, conv1d... layers)
-	  |	   |	  ├── Dropout.py
+      |	   |	  ├── Dropout.py
       |    |      ├── Linear.py
       |    |      ├── Conv1D.py
       |    |      ├── MaxPool.py
@@ -35,7 +35,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    ├── network/               (Folder containing sequential module)
       |    |      └── Sequential.py
       |    ├── optimizer_functions/   (Folder containing optimizer functions such as SGD)
-	  |    |      ├── Adam.py
+      |    |      ├── Adam.py
       |    |      ├── GradientDescent.py
       |    |      ├── MinibatchGradientDescent.py
       |    |      └── StochasticGradientDescent.py
@@ -47,7 +47,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    ├── global_variables.py    (File containing all the global static variables)
       |    ├── main.py                (Main file containing the demo)
       |    └── unit_test.py           (Test file containing unit tests on easy problems) 
-	  ├── report/                     (Folder containing the images and latex files for the report)	
+      ├── report/                     (Folder containing the images and latex files for the report)	
       ├── README.md		          
       └── LICENSE  
 </pre></code>
