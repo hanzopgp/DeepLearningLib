@@ -1,10 +1,10 @@
 import numpy as np
-import core
-from core import DIVIDE_BY_ZERO_EPS, MIN_THRESHOLD, MAX_THRESHOLD
-from utils import one_hot
+import nndyi.core
+from nndyi.core import DIVIDE_BY_ZERO_EPS, MIN_THRESHOLD, MAX_THRESHOLD
+from nndyi.utils import one_hot
 
 
-class BinaryCrossEntropy(core.Loss):
+class BinaryCrossEntropy(nndyi.core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = np.where(prediction < MIN_THRESHOLD, MIN_THRESHOLD, prediction)
@@ -22,7 +22,7 @@ class SparseBinaryCrossEntropy(BinaryCrossEntropy):
 		super().forward(one_hot(truth, prediction.shape[1]), prediction)
 
 
-class CategoricalCrossEntropy(core.Loss):
+class CategoricalCrossEntropy(nndyi.core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = prediction
@@ -37,7 +37,7 @@ class SparseCategoricalCrossEntropy(CategoricalCrossEntropy):
 		super().forward(one_hot(truth, prediction.shape[1]), prediction)
 
 
-class SparseCategoricalCrossEntropySoftmax(core.Loss):
+class SparseCategoricalCrossEntropySoftmax(nndyi.core.Loss):
 	def forward(self, truth, prediction):
 		self._y = one_hot(truth, prediction.shape[1])
 		self._yhat = np.where(prediction < MIN_THRESHOLD, MIN_THRESHOLD, prediction)
@@ -50,7 +50,7 @@ class SparseCategoricalCrossEntropySoftmax(core.Loss):
 		self._new_delta = _exp / (np.sum(_exp, axis=1).reshape((-1, 1)) + DIVIDE_BY_ZERO_EPS) - self._y
 
 
-class MeanAbsoluteError(core.Loss):
+class MeanAbsoluteError(nndyi.core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = prediction
@@ -60,7 +60,7 @@ class MeanAbsoluteError(core.Loss):
 		self._new_delta = np.where(self._yhat > self._y, 1, -1)
 
 
-class MeanSquaredError(core.Loss):
+class MeanSquaredError(nndyi.core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = prediction
@@ -70,7 +70,7 @@ class MeanSquaredError(core.Loss):
 		self._new_delta = -2 * (self._y - self._yhat)
 
 
-class RootMeanSquaredError(core.Loss):
+class RootMeanSquaredError(nndyi.core.Loss):
 	def forward(self, truth, prediction):
 		self._y = truth
 		self._yhat = prediction

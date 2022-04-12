@@ -1,7 +1,10 @@
-from global_imports import *
+import numpy as np
 from typing import List, Tuple, Dict, Any
 from sklearn.model_selection import train_test_split
-from utils.utils import one_hot
+from nndyi import Sequential
+from nndyi.layer import Linear
+from nndyi.utils import one_hot
+from src.data.DataGeneration import *
 
 YELLOW = "\033[93m"
 GREEN = "\033[92m"
@@ -61,8 +64,10 @@ def run_test(
 		or (scoring_method == "lt" and score <= target_score) \
 		or (scoring_method == "gt" and score >= target_score):
 		print(f"{GREEN}OK{ENDC}")
+		del model
 		return True
 	print(f"{RED}KO{ENDC}")
+	del model
 	return False
 	
 
@@ -217,12 +222,12 @@ if __name__ == '__main__':
 		# "gd",
 		# "sgd",
 		# "mgd",
-		"adam"
+		"adam",
 	]
 	params_loss = [
 		"mse",
 		"mae",
-		"rmse"
+		"rmse",
 	]
 
 	for optim in params_optim:
@@ -233,18 +238,19 @@ if __name__ == '__main__':
 				X=genCont.x, Y=genCont.y,
 				layers=[
 					(Linear(1, 4), "relu"),
-					(Linear(4, 1), "linear")
+					(Linear(4, 1), "identity")
 				],
 				model_kwargs=None,
 				compile_kwargs=dict(
 					loss=loss,
 					optimizer=optim,
 					#learning_rate=8e-4
-					learning_rate=1e-4 if optim != "mgd" else 1e-5
+					learning_rate=1e-4 if optim != "mgd" else 1e-5,
+					decay=(1e-4 * 5)
 				),
 				fit_kwargs=dict(
 					n_epochs=150,
-					verbose=False
+					verbose=True
 				),
 				target_score=0.1,
 				scoring_func=mse_score,

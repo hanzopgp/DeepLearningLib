@@ -1,5 +1,5 @@
 import numpy as np
-from core import DIVIDE_BY_ZERO_EPS
+from nndyi.core import DIVIDE_BY_ZERO_EPS
 
 
 def one_hot(y, n_class):

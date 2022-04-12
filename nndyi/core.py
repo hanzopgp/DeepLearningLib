@@ -1,7 +1,6 @@
 import numpy as np
-from dataclasses import dataclass
-from . import Sequential
-from optimizer import EarlyStopping
+# from nndyi import Sequential
+from nndyi.early_stopping import EarlyStopping, EarlyStoppingHandler
 
 
 DIVIDE_BY_ZERO_EPS = 1e-9
@@ -44,25 +43,9 @@ class Loss(Module):
 		raise NotImplementedError()
 
 
-@dataclass
-class EarlyStoppingHandler():
-	es_metric:str
-	es_min_delta:float
-	es_patience:int
-	best_model:Sequential
-	best_cpt_epoch:int = 0
-	best_valid_loss:float = np.inf
-	best_train_loss:float = np.inf
-	best_valid_acc:float = 0.
-	best_train_acc:float = 0.
-	cpt_patience:int = 0
-
-	def update(self, epoch:int, train_loss: float, train_acc:float, valid_loss:float, valid_acc:float) -> bool:
-		pass
-
-
 class Optimizer():
-	def __init__(self, network:Sequential, learning_rate:float, decay:float, n_batch:int):
+	def __init__(self, network, learning_rate:float, decay:float, n_batch:int):
+	# def __init__(self, network: Sequential, learning_rate:float, decay:float, n_batch:int):
 		self._seq = network
 		self._lr = learning_rate
 		self._decay = decay

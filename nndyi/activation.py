@@ -1,8 +1,8 @@
 import numpy as np
-import core
+import nndyi.core
 
 
-class LeakyReLU(core.Activation):
+class LeakyReLU(nndyi.core.Activation):
 	ALPHA = 1e-2
 
 	def forward(self, data):
@@ -13,7 +13,7 @@ class LeakyReLU(core.Activation):
 		self._new_delta = np.where(self._input > 0, 1, self.ALPHA) * self._delta
 
 
-class Identity(core.Activation):
+class Identity(nndyi.core.Activation):
 	def forward(self, data):
 		self._input = self._output = data
 
@@ -21,7 +21,7 @@ class Identity(core.Activation):
 		self._new_delta = np.ones_like(self._input) * self._delta
 
 
-class ReLU(core.Activation):
+class ReLU(nndyi.core.Activation):
 	def forward(self, data):
 		self._input = data
 		self._output = np.maximum(0, self._input)
@@ -30,17 +30,17 @@ class ReLU(core.Activation):
 		self._new_delta = np.where(self._input > 0, 1, 0) * self._delta
 
 
-class Sigmoid(core.Activation):
+class Sigmoid(nndyi.core.Activation):
 	def forward(self, data):
 		self._input = data
-		self._output = 1/(1 + np.exp(-self._input))
+		self._output = 1/(1 + np.exp(-data))
 
 	def backward(self):
 		sigmoid = 1/(1 + np.exp(-self._input))
 		self._new_delta = sigmoid * (1 - sigmoid) * self._delta
 
 
-class Softmax(core.Activation):
+class Softmax(nndyi.core.Activation):
 	def forward(self, data):
 		self._input = data - np.max(data, axis=1, keepdims=True)	# Fixes overflow issue in exp()
 		exp_ = np.exp(self._input)
@@ -48,11 +48,11 @@ class Softmax(core.Activation):
 
 	def backward(self):
 		_exp = np.exp(self._input)
-		soft = _exp / np.sum(_exp, axis=1).reshape(-1,1)
+		soft = _exp / np.sum(_exp, axis=1).reshape(-1, 1)
 		self._new_delta = self._delta * (soft*(1-soft))
 
 
-class Tanh(core.Activation):
+class Tanh(nndyi.core.Activation):
 	def forward(self, data):
 		self._input = data
 		self._output = np.tanh(self._input)

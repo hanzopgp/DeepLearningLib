@@ -2,37 +2,37 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 
-import core
-import activation
-import loss
-import optimizer
-import layer
+import nndyi.core
+import nndyi.activation
+import nndyi.loss
+import nndyi.optimizer
+import nndyi.layer
 
 
 NN_METRIC_ARGS = (None, 'accuracy')
 ACTI_MAPPING = dict(
-	relu = activation.ReLU,
-	sigmoid = activation.Sigmoid,
-	tanh = activation.Tanh,
-	softmax = activation.Softmax,
-	identity = activation.Identity,
-	lrelu = activation.LeakyReLU,
+	relu = nndyi.activation.ReLU,
+	sigmoid = nndyi.activation.Sigmoid,
+	tanh = nndyi.activation.Tanh,
+	softmax = nndyi.activation.Softmax,
+	identity = nndyi.activation.Identity,
+	lrelu = nndyi.activation.LeakyReLU,
 )
 LOSS_MAPPING = dict(
-	binary_crossentropy = loss.BinaryCrossEntropy,
-	categorical_crossentropy = loss.CategoricalCrossEntropy,
-	mse = loss.MeanSquaredError,
-	mae = loss.MeanAbsoluteError,
-	rmse = loss.RootMeanSquaredError,
-	sparse_binary_crossentropy = loss.SparseBinaryCrossEntropy,
-	sparse_categorical_crossentropy = loss.SparseCategoricalCrossEntropy,
-	sparse_categorical_crossentropy_softmax = loss.SparseCategoricalCrossEntropySoftmax,
+	binary_crossentropy = nndyi.loss.BinaryCrossEntropy,
+	categorical_crossentropy = nndyi.loss.CategoricalCrossEntropy,
+	mse = nndyi.loss.MeanSquaredError,
+	mae = nndyi.loss.MeanAbsoluteError,
+	rmse = nndyi.loss.RootMeanSquaredError,
+	sparse_binary_crossentropy = nndyi.loss.SparseBinaryCrossEntropy,
+	sparse_categorical_crossentropy = nndyi.loss.SparseCategoricalCrossEntropy,
+	sparse_categorical_crossentropy_softmax = nndyi.loss.SparseCategoricalCrossEntropySoftmax,
 )
 OPTI_MAPPING = dict(
-	gd = optimizer.GradientDescent,
-	sgd = optimizer.StochasticGradientDescent,
-	mgd = optimizer.MinibatchGradientDescent,
-	adam = optimizer.Adam,
+	gd = nndyi.optimizer.GradientDescent,
+	sgd = nndyi.optimizer.StochasticGradientDescent,
+	mgd = nndyi.optimizer.MinibatchGradientDescent,
+	adam = nndyi.optimizer.Adam,
 )
 
 
@@ -40,15 +40,12 @@ class Sequential():
 	"""The neural network's class consist of multiple linear/convolutional layers, their activation/pooling
 	layers as well as a loss layer and an optimizer"""
 
-	def __init__(self, layers=[]):
-		# First check if layers list contains only valid network core.Modules
-		for l in layers:
-			assert isinstance(l, core.Module)
-		self._net:List[core.Module] = layers
+	def __init__(self):
+		self._net:List[nndyi.core.Module] = []
 
-	def add(self, layer:core.Module, activation=None):
+	def add(self, layer:nndyi.core.Module, activation=None):
 		"""Add a layer to the network and its activation function"""
-		assert isinstance(layer, core.Module)
+		assert isinstance(layer, nndyi.core.Module)
 		self._net.append(layer)
 		if activation in ACTI_MAPPING:
 			self._net.append(ACTI_MAPPING[activation]())
@@ -62,13 +59,13 @@ class Sequential():
 		assert loss in LOSS_MAPPING
 		assert optimizer in OPTI_MAPPING
 		assert metric in NN_METRIC_ARGS
-		assert n_batch <= 0
+		assert n_batch > 0
 		
 		self._metric:str = metric
 		self._net.append(LOSS_MAPPING[loss]())
-		self._optim:core.Optimizer = OPTI_MAPPING[optimizer](self._net, learning_rate, decay, n_batch)
+		self._optim:nndyi.core.Optimizer = OPTI_MAPPING[optimizer](self, learning_rate, decay, n_batch)
 
-	def fit(self, *args, n_epochs=20, verbose=True, early_stopping:optimizer.EarlyStopping=None):
+	def fit(self, *args, n_epochs=20, verbose=True, early_stopping=None):
 		"""Train the network using input data and truth values. It is also possible
 		to pass validation data along with training data"""
 		assert len(args) in (2, 4)
@@ -154,13 +151,13 @@ class Sequential():
 		print("=" * 30)
 		n = 1
 		for l in self._net[:-1]:
-			if isinstance(l, layer.Linear):
+			if isinstance(l, nndyi.layer.Linear):
 				print(f"({n}) Linear layer with parameters of shape {l._W.shape}")
 				n += 1
-			elif isinstance(l, layer.Dropout):
+			elif isinstance(l, nndyi.layer.Dropout):
 				print(f"({n}) Dropout layer with rate {l._rate}")
 				n += 1
-			elif isinstance(l, core.Activation):
+			elif isinstance(l, nndyi.core.Activation):
 				print(f"  ---- Activation: {type(l)}")
 		print(f"* Loss: {type(self._net[-1])}")
 		print(f"* Optimizer: {type(self._optim)}")
@@ -170,6 +167,6 @@ class Sequential():
 	def count_params(self) -> int:
 		res = 0
 		for l in self._net[-1]:
-			if isinstance(l, layer.Linear):
+			if isinstance(l, nndyi.layer.Linear):
 				res += l._W.size + l._b.size
 		return res
