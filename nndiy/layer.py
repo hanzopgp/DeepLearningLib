@@ -1,5 +1,5 @@
 import numpy as np
-import nndyi.core
+import nndiy.core
 
 
 LINEAR_INIT_ARGS = (None, 'xavier')
@@ -7,7 +7,7 @@ PARAMS_INIT_FACTOR = 1e-3
 OVERFLOW_THRESHOLD = 1e6
 
 
-class Linear(nndyi.core.Module):
+class Linear(nndiy.core.Module):
 	"""A layer consist of multiple linear neurons, each with its own parameters (weight and bias)"""
 
 	def __init__(self, size_in:int, size_out:int, init='xavier', regularization=1e-9):
@@ -43,7 +43,7 @@ class Linear(nndyi.core.Module):
 		self._grad_b += np.sum(delta, axis=0)
 
 
-class Dropout(nndyi.core.Module):
+class Dropout(nndiy.core.Module):
 	"""Drop-out layer with a fixed drop-out rate"""
 
 	def __init__(self, rate=0.2):

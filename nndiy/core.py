@@ -1,6 +1,6 @@
 import numpy as np
-# from nndyi import Sequential
-from nndyi.early_stopping import EarlyStopping, EarlyStoppingHandler
+# from nndiy import Sequential
+from nndiy.early_stopping import EarlyStopping, EarlyStoppingHandler
 
 
 DIVIDE_BY_ZERO_EPS = 1e-9
@@ -57,9 +57,8 @@ class Optimizer():
 	def _update_layer_params(self, layer:Module):
 		raise NotImplementedError()
 
-	def _make_es_handler(self, early_stopping:EarlyStopping):
-		if early_stopping is not None:
-			self._es = EarlyStoppingHandler(*early_stopping, self._seq)
+	def _make_es_handler(self, es:EarlyStopping):
+		self._es = None if es is None else EarlyStoppingHandler(es, self._seq)
 
 	def _show_updates(self, epoch:int, train_loss: float, train_acc:float, valid_loss:float, valid_acc:float):
 		epoch = "%04d" % (epoch)

@@ -1,7 +1,8 @@
-from pyparsing import alphanums
 from Core import *
 from global_imports import *
 from global_variables import *
+
+from layers.Linear import Linear
 
 # Source: https://arxiv.org/pdf/1412.6980.pdf
 

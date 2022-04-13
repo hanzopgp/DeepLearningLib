@@ -2,37 +2,37 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 
-import nndyi.core
-import nndyi.activation
-import nndyi.loss
-import nndyi.optimizer
-import nndyi.layer
+import nndiy.core
+import nndiy.activation
+import nndiy.loss
+import nndiy.optimizer
+import nndiy.layer
 
 
 NN_METRIC_ARGS = (None, 'accuracy')
 ACTI_MAPPING = dict(
-	relu = nndyi.activation.ReLU,
-	sigmoid = nndyi.activation.Sigmoid,
-	tanh = nndyi.activation.Tanh,
-	softmax = nndyi.activation.Softmax,
-	identity = nndyi.activation.Identity,
-	lrelu = nndyi.activation.LeakyReLU,
+	relu = nndiy.activation.ReLU,
+	sigmoid = nndiy.activation.Sigmoid,
+	tanh = nndiy.activation.Tanh,
+	softmax = nndiy.activation.Softmax,
+	identity = nndiy.activation.Identity,
+	lrelu = nndiy.activation.LeakyReLU,
 )
 LOSS_MAPPING = dict(
-	binary_crossentropy = nndyi.loss.BinaryCrossEntropy,
-	categorical_crossentropy = nndyi.loss.CategoricalCrossEntropy,
-	mse = nndyi.loss.MeanSquaredError,
-	mae = nndyi.loss.MeanAbsoluteError,
-	rmse = nndyi.loss.RootMeanSquaredError,
-	sparse_binary_crossentropy = nndyi.loss.SparseBinaryCrossEntropy,
-	sparse_categorical_crossentropy = nndyi.loss.SparseCategoricalCrossEntropy,
-	sparse_categorical_crossentropy_softmax = nndyi.loss.SparseCategoricalCrossEntropySoftmax,
+	binary_crossentropy = nndiy.loss.BinaryCrossEntropy,
+	categorical_crossentropy = nndiy.loss.CategoricalCrossEntropy,
+	mse = nndiy.loss.MeanSquaredError,
+	mae = nndiy.loss.MeanAbsoluteError,
+	rmse = nndiy.loss.RootMeanSquaredError,
+	sparse_binary_crossentropy = nndiy.loss.SparseBinaryCrossEntropy,
+	sparse_categorical_crossentropy = nndiy.loss.SparseCategoricalCrossEntropy,
+	sparse_categorical_crossentropy_softmax = nndiy.loss.SparseCategoricalCrossEntropySoftmax,
 )
 OPTI_MAPPING = dict(
-	gd = nndyi.optimizer.GradientDescent,
-	sgd = nndyi.optimizer.StochasticGradientDescent,
-	mgd = nndyi.optimizer.MinibatchGradientDescent,
-	adam = nndyi.optimizer.Adam,
+	gd = nndiy.optimizer.GradientDescent,
+	sgd = nndiy.optimizer.StochasticGradientDescent,
+	mgd = nndiy.optimizer.MinibatchGradientDescent,
+	adam = nndiy.optimizer.Adam,
 )
 
 
@@ -41,11 +41,11 @@ class Sequential():
 	layers as well as a loss layer and an optimizer"""
 
 	def __init__(self):
-		self._net:List[nndyi.core.Module] = []
+		self._net:List[nndiy.core.Module] = []
 
-	def add(self, layer:nndyi.core.Module, activation=None):
+	def add(self, layer:nndiy.core.Module, activation=None):
 		"""Add a layer to the network and its activation function"""
-		assert isinstance(layer, nndyi.core.Module)
+		assert isinstance(layer, nndiy.core.Module)
 		self._net.append(layer)
 		if activation in ACTI_MAPPING:
 			self._net.append(ACTI_MAPPING[activation]())
@@ -63,7 +63,7 @@ class Sequential():
 		
 		self._metric:str = metric
 		self._net.append(LOSS_MAPPING[loss]())
-		self._optim:nndyi.core.Optimizer = OPTI_MAPPING[optimizer](self, learning_rate, decay, n_batch)
+		self._optim:nndiy.core.Optimizer = OPTI_MAPPING[optimizer](self, learning_rate, decay, n_batch)
 
 	def fit(self, *args, n_epochs=20, verbose=True, early_stopping=None):
 		"""Train the network using input data and truth values. It is also possible
@@ -151,13 +151,13 @@ class Sequential():
 		print("=" * 30)
 		n = 1
 		for l in self._net[:-1]:
-			if isinstance(l, nndyi.layer.Linear):
+			if isinstance(l, nndiy.layer.Linear):
 				print(f"({n}) Linear layer with parameters of shape {l._W.shape}")
 				n += 1
-			elif isinstance(l, nndyi.layer.Dropout):
+			elif isinstance(l, nndiy.layer.Dropout):
 				print(f"({n}) Dropout layer with rate {l._rate}")
 				n += 1
-			elif isinstance(l, nndyi.core.Activation):
+			elif isinstance(l, nndiy.core.Activation):
 				print(f"  ---- Activation: {type(l)}")
 		print(f"* Loss: {type(self._net[-1])}")
 		print(f"* Optimizer: {type(self._optim)}")
@@ -167,6 +167,6 @@ class Sequential():
 	def count_params(self) -> int:
 		res = 0
 		for l in self._net[-1]:
-			if isinstance(l, nndyi.layer.Linear):
+			if isinstance(l, nndiy.layer.Linear):
 				res += l._W.size + l._b.size
 		return res

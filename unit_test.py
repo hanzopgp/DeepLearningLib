@@ -1,9 +1,9 @@
 import numpy as np
 from typing import List, Tuple, Dict, Any
 from sklearn.model_selection import train_test_split
-from nndyi import Sequential
-from nndyi.layer import Linear
-from nndyi.utils import one_hot
+from nndiy import Sequential
+from nndiy.layer import Linear
+from nndiy.utils import one_hot
 from src.data.DataGeneration import *
 
 YELLOW = "\033[93m"
@@ -60,14 +60,13 @@ def run_test(
 	
 	score = scoring_func(model.predict(X_test), Y_test)
 	print("  Score: %.4f " % score, end='')
+	# model.plot_stats()
 	if target_score is None \
 		or (scoring_method == "lt" and score <= target_score) \
 		or (scoring_method == "gt" and score >= target_score):
 		print(f"{GREEN}OK{ENDC}")
-		del model
 		return True
 	print(f"{RED}KO{ENDC}")
-	del model
 	return False
 	
 
@@ -84,11 +83,11 @@ if __name__ == '__main__':
 		# "2 Gaussians, BCE loss, GD": ("binary_crossentropy", "gd"),
 		# "2 Gaussians, BCE loss, SGD": ("binary_crossentropy", "sgd"),
 		# "2 Gaussians, BCE loss, MGD": ("binary_crossentropy", "mgd"),
-		# "2 Gaussians, BCE loss, ADAM": ("binary_crossentropy", "adam"),
+		"2 Gaussians, BCE loss, ADAM": ("binary_crossentropy", "adam"),
 		# "2 Gaussians, Sparse BCE loss, GD": ("sparse_binary_crossentropy", "gd"),
 		# "2 Gaussians, Sparse BCE loss, SGD": ("sparse_binary_crossentropy", "sgd"),
 		# "2 Gaussians, Sparse BCE loss, MGD": ("sparse_binary_crossentropy", "mgd"),
-		# "2 Gaussians, Sparse BCE loss, ADAM": ("sparse_binary_crossentropy", "adam")
+		"2 Gaussians, Sparse BCE loss, ADAM": ("sparse_binary_crossentropy", "adam")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -125,11 +124,11 @@ if __name__ == '__main__':
 		# "4 Gaussians, BCE loss, GD optim": ("binary_crossentropy", "gd"),
 		# "4 Gaussians, BCE loss, SGD optim": ("binary_crossentropy", "sgd"),
 		# "4 Gaussians, BCE loss, MGD optim": ("binary_crossentropy", "mgd"),
-		# "4 Gaussians, BCE loss, ADAM optim": ("binary_crossentropy", "adam"),
+		"4 Gaussians, BCE loss, ADAM optim": ("binary_crossentropy", "adam"),
 		# "4 Gaussians, Sparse BCE loss, GD optim": ("sparse_binary_crossentropy", "gd"),
 		# "4 Gaussians, Sparse BCE loss, SGD optim": ("sparse_binary_crossentropy", "sgd"),
 		# "4 Gaussians, Sparse BCE loss, MGD optim": ("sparse_binary_crossentropy", "mgd"),
-		# "4 Gaussians, Sparse BCE loss, ADAM optim": ("sparse_binary_crossentropy", "adam")
+		"4 Gaussians, Sparse BCE loss, ADAM optim": ("sparse_binary_crossentropy", "adam")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -173,12 +172,12 @@ if __name__ == '__main__':
 	test_params = {
 		# "Vertical data, CCE, GD optim": ("categorical_crossentropy", "gd"),
 		# "Vertical data, CCE, SGD optim": ("categorical_crossentropy", "sgd"),
-		# "Vertical data, CCE, MGD optim": ("categorical_crossentropy", "mgd"),
-		# "Vertical data, CCE, ADAM optim": ("categorical_crossentropy", "adam"),
+		# "Vertical data, CCpE, MGD optim": ("categorical_crossentropy", "mgd"),
+		"Vertical data, CCE, ADAM optim": ("categorical_crossentropy", "adam"),
 		# "Vertical data, Sparse CCE, GD optim": ("sparse_categorical_crossentropy", "gd"),
 		# "Vertical data, Sparse CCE, SGD optim": ("sparse_categorical_crossentropy", "sgd"),
 		# "Vertical data, Sparse CCE, MGD optim": ("sparse_categorical_crossentropy", "mgd"),
-		# "Vertical data, Sparse CCE, ADAM optim": ("sparse_categorical_crossentropy", "adam")
+		"Vertical data, Sparse CCE, ADAM optim": ("sparse_categorical_crossentropy", "adam")
 	}
 	for name in test_params:
 		loss, optim = test_params[name]
@@ -250,7 +249,7 @@ if __name__ == '__main__':
 				),
 				fit_kwargs=dict(
 					n_epochs=150,
-					verbose=True
+					verbose=False
 				),
 				target_score=0.1,
 				scoring_func=mse_score,
