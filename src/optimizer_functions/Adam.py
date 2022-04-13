@@ -1,7 +1,9 @@
+from numpy import zeros_like
 from pyparsing import alphanums
 from Core import *
 from global_imports import *
 from global_variables import *
+from layers.Linear import Linear
 
 # Source: https://arxiv.org/pdf/1412.6980.pdf
 
@@ -51,11 +53,15 @@ class Adam(Optimizer):
 				## With our implementation we can't use update_parameters() from sequential module
 				## We need to update the parameters in ADAM optimizer
 				for layer in self._net._network:
-					try: ## Only apply ADAM on layers with parameters
+					if isinstance(layer, Linear): ## Only apply ADAM on layers with parameters
 						## Get layer gradients
 						grad_w = layer._gradient
 						grad_b = layer._gradient_bias
 						## Compute momentums
+						self._mw = zeros_like(grad_w)
+						self._vw = zeros_like(grad_w)
+						self._mb = zeros_like(grad_b)
+						self._vb = zeros_like(grad_b)
 						self._mw = self._b1 * self._mw + (1 - self._b1) * grad_w
 						self._vw = self._b2 * self._vw + (1 - self._b2) * np.power(grad_w, 2)
 						self._mb = self._b1 * self._mb + (1 - self._b1) * grad_b
@@ -74,7 +80,7 @@ class Adam(Optimizer):
 						## Reset gradients
 						layer._gradient = np.zeros_like(grad_w)
 						layer._gradient_bias = np.zeros_like(grad_b)
-					except:
+					else:
 						continue
 			
 			## Learning rate computation with decay with respect to cpt_epoch

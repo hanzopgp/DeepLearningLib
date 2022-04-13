@@ -2,7 +2,7 @@ import numpy as np
 # np.random.seed(42)
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from numba import jit
+# from numba import jit
 
 import global_variables
 
