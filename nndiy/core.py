@@ -1,5 +1,4 @@
 import numpy as np
-# from nndiy import Sequential
 from nndiy.early_stopping import EarlyStopping, EarlyStoppingHandler
 
 
