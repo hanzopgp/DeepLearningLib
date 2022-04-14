@@ -5,9 +5,9 @@ from nndiy.utils import one_hot
 
 
 class BinaryCrossEntropy(nndiy.core.Loss):
-	def forward(self, truth, prediction):
-		self._y = truth
-		self._yhat = np.where(prediction < MIN_THRESHOLD, MIN_THRESHOLD, prediction)
+	def forward(self, y, yhat):
+		self._y = y
+		self._yhat = np.where(yhat < MIN_THRESHOLD, MIN_THRESHOLD, yhat)
 		self._yhat = np.where(self._yhat > MAX_THRESHOLD, MAX_THRESHOLD, self._yhat)
 		self._output = (1 - self._y) * np.log(1 - self._yhat + DIVIDE_BY_ZERO_EPS) \
 			- self._y * np.log(self._yhat + DIVIDE_BY_ZERO_EPS)
@@ -18,14 +18,14 @@ class BinaryCrossEntropy(nndiy.core.Loss):
 
 
 class SparseBinaryCrossEntropy(BinaryCrossEntropy):
-	def forward(self, truth, prediction):
-		super().forward(one_hot(truth, prediction.shape[1]), prediction)
+	def forward(self, y, yhat):
+		super().forward(one_hot(y, yhat.shape[1]), yhat)
 
 
 class CategoricalCrossEntropy(nndiy.core.Loss):
-	def forward(self, truth, prediction):
-		self._y = truth
-		self._yhat = prediction
+	def forward(self, y, yhat):
+		self._y = y
+		self._yhat = yhat
 		self._output = 1 - np.sum(self._yhat * self._y, axis=1)
 
 	def backward(self):
@@ -33,14 +33,14 @@ class CategoricalCrossEntropy(nndiy.core.Loss):
 
 
 class SparseCategoricalCrossEntropy(CategoricalCrossEntropy):
-	def forward(self, truth, prediction):
-		super().forward(one_hot(truth, prediction.shape[1]), prediction)
+	def forward(self, y, yhat):
+		super().forward(one_hot(y, yhat.shape[1]), yhat)
 
 
 class SparseCategoricalCrossEntropySoftmax(nndiy.core.Loss):
-	def forward(self, truth, prediction):
-		self._y = one_hot(truth, prediction.shape[1])
-		self._yhat = np.where(prediction < MIN_THRESHOLD, MIN_THRESHOLD, prediction)
+	def forward(self, y, yhat):
+		self._y = one_hot(y, yhat.shape[1])
+		self._yhat = np.where(yhat < MIN_THRESHOLD, MIN_THRESHOLD, yhat)
 		self._yhat = np.where(self._yhat > MAX_THRESHOLD, MAX_THRESHOLD, self._yhat)
 		self._output = np.log(np.sum(np.exp(self._yhat), axis=1)) \
 			- np.sum(self._y * self._yhat, axis=1)
@@ -51,9 +51,9 @@ class SparseCategoricalCrossEntropySoftmax(nndiy.core.Loss):
 
 
 class MeanAbsoluteError(nndiy.core.Loss):
-	def forward(self, truth, prediction):
-		self._y = truth
-		self._yhat = prediction
+	def forward(self, y, yhat):
+		self._y = y
+		self._yhat = yhat
 		self._output = np.sum(np.abs(self._y - self._yhat), axis=1)
 
 	def backward(self):
@@ -61,9 +61,9 @@ class MeanAbsoluteError(nndiy.core.Loss):
 
 
 class MeanSquaredError(nndiy.core.Loss):
-	def forward(self, truth, prediction):
-		self._y = truth
-		self._yhat = prediction
+	def forward(self, y, yhat):
+		self._y = y
+		self._yhat = yhat
 		self._output = np.sum((self._y - self._yhat) ** 2, axis=1)
 
 	def backward(self):
@@ -71,9 +71,9 @@ class MeanSquaredError(nndiy.core.Loss):
 
 
 class RootMeanSquaredError(nndiy.core.Loss):
-	def forward(self, truth, prediction):
-		self._y = truth
-		self._yhat = prediction
+	def forward(self, y, yhat):
+		self._y = y
+		self._yhat = yhat
 		self._output = np.sum(np.sqrt((self._y - self._yhat) ** 2), axis=1)
 
 	def backward(self):

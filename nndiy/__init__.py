@@ -123,7 +123,12 @@ class Sequential():
 		## Forward pass to update the network with X
 		output = self._forward(X, y)
 		loss = np.mean(self._net[-1]._output)
-		acc = np.mean(self._y == np.argmax(output, axis=1)) if self._metric == 'accuracy' else None
+		acc = np.mean(y == np.argmax(output, axis=1)) if self._metric == 'accuracy' else None
+		# loss = self._net[-1]._output.mean()
+		# if self._metric == "accuracy":
+		# 	acc = np.where(y == self._net[-2]._output.argmax(axis=1), 1, 0).mean()
+		# else:
+		# 	acc = None ## Trick to avoid displaying acc when not in classification
 		return loss, acc
 
 	def plot_stats(self):
