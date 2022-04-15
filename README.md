@@ -7,47 +7,19 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
 ## Project architecture
 
 <pre><code>DeepLearningLib/
-      ├── src/                   
-      |    ├── activation_functions/  (Folder containing activation functions)
-      |    |      ├── LeakyRELU.py
-      |    |      ├── Lin.py
-      |    |      ├── ReLU.py
-      |    |      ├── Sigmoid.py
-      |    |      ├── Softmax.py
-      |    |      └── Tanh.py
-      |    ├── data/                  (Folder containing data generation functions)
-      |    |      └── DataGeneration.py
-      |    ├── layers/                (Folder contraining linear, conv1d... layers)
-      |    |	  ├── Dropout.py
-      |    |      ├── Linear.py
-      |    |      ├── Conv1D.py
-      |    |      ├── MaxPool.py
-      |    |      └── Flatten.py
-      |    ├── loss_functions/        (Folder containing loss functions)
-      |    |      ├── BinaryCrossEntropy.py
-      |    |      ├── CategoricalCrossEntropy.py
-      |    |      ├── MeanAbsoluteError.py
-      |    |      ├── MeanSquaredError.py
-      |    |      ├── RootMeanSquaredError.py
-      |    |      ├── SparseBinaryCrossEntropy.py
-      |    |      ├── SparseCategoricalCrossEntropy.py
-      |    |      └── SparseCategoricalCrossEntropySoftmax.py
-      |    ├── network/               (Folder containing sequential module)
-      |    |      └── Sequential.py
-      |    ├── optimizer_functions/   (Folder containing optimizer functions such as SGD)
-      |    |      ├── Adam.py
-      |    |      ├── GradientDescent.py
-      |    |      ├── MinibatchGradientDescent.py
-      |    |      └── StochasticGradientDescent.py
-      |    ├── utils/                 (Folder containing utility functions such as split_data())
-      |    |      └── utils.py
-      |    ├── Core.py                (File containing abstract classes such as Modules/Loss/Optimizer)
-      |    ├── experiences.py         (File containing the MLP/AE/CNN experiences)
-      |    ├── global_imports.py      (File containing the imports to avoid redundancy)
-      |    ├── global_variables.py    (File containing all the global static variables)
-      |    ├── main.py                (Main file containing the demo)
-      |    └── unit_test.py           (Test file containing unit tests on easy problems) 
-      ├── report/                     (Folder containing the images and latex files for the report)	
+      ├── nndiy/                   
+      |    ├── __init__.py        (Contains the sequential object and global variables)
+      |    ├── activation.py      (Contains the activation functions such as ReLU/Tanh...)
+      |    ├── core.py            (Contains the abstract classes)
+      |    ├── early_stopping.py  (Contains the early stopping objects)
+      |    ├── layer.py           (Contains the layers object such as Linear/Dropout...)
+      |    ├── loss.py            (Contains the loss objects such as MSE/BCE...)
+      |    ├── optimizer.py       (Contains the optimizer objects such as SGD/ADAM...)
+      |    ├── utils.py           (Contains the utility functions such as min_max_scale/one_hot...)
+      ├── experiences.py          (Contains the MLP/AE/CNN experiences)
+      ├── main.py                 (Contains the demo)
+      └── unit_test.py            (Contains unit tests on simple problems) 
+      ├── report/                 (Folder containing the image and report)	
       ├── README.md		          
       └── LICENSE  
 </pre></code>
