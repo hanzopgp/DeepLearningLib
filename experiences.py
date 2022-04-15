@@ -1,9 +1,14 @@
-from tkinter import Y
-from global_imports import *
-from utils.utils import *
 import tensorflow as tf ## Usefull for datasets
-np.random.seed(42)
+import numpy as np
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
+from nndiy.utils import one_hot, min_max_scaler, split_data, split_X
+from nndiy import Sequential
+from nndiy.layer import Linear, Dropout
+from nndiy.early_stopping import EarlyStopping
+
+np.random.seed(42)
 
 label_name_fashion_mnist = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 label_name_digits_mnist = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
@@ -24,49 +29,27 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 	init_type = "xavier"
 	learning_rate = 1e-4
 	decay = learning_rate * 5
-	regularization_lambda = 1e-9
+	regularization = 1e-9
 	train_split = 0.8
 	## Splitting to get validation set
 	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
-	size = 1_000
+	size = 3_000
 	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 	## Building and training model
 	model = Sequential()
 	if not latent: ## Normal classification on 728 features MNIST
 		n_epochs = 100
-		early_stopping = {"patience": 10, "metric": "valid_loss", "min_delta": 0.001}
-		model.add(layer=Linear(n_features, 
-							256, 
-							init_type=init_type, 
-							regularization_lambda=regularization_lambda), activation="tanh")
-		model.add(layer=Linear(256, 
-							128, 
-							init_type=init_type, 
-							regularization_lambda=regularization_lambda), activation="tanh")
-		model.add(layer=Linear(128, 
-							n_classes, 
-							init_type=init_type, 
-							regularization_lambda=regularization_lambda), activation="softmax")
+		early_stopping = EarlyStopping("valid_loss", 0.001, 10)
+		model.add(layer=Linear(n_features, 256, init=init_type, regularization=regularization), activation="tanh")
+		model.add(layer=Linear(256, 128, init=init_type, regularization=regularization), activation="tanh")
+		model.add(layer=Linear(128, n_classes, init=init_type, regularization=regularization), activation="softmax")
 	else: ## Latent classification on 64 features MNIST
 		n_epochs = 200
-		early_stopping = {"patience": 15, "metric": "valid_loss", "min_delta": 0.001}
-		model.add(layer=Linear(n_features, 
-							32, 
-							init_type=init_type, 
-							regularization_lambda=regularization_lambda), activation="tanh")
-		model.add(layer=Linear(32, 
-							16, 
-							init_type=init_type, 
-							regularization_lambda=regularization_lambda), activation="tanh")
-		model.add(layer=Linear(16, 
-							n_classes, 
-							init_type=init_type, 
-							regularization_lambda=regularization_lambda), activation="softmax")	
-	model.compile(loss="sparse_categorical_crossentropy", 
-				  optimizer="sgd",
-				  learning_rate=learning_rate,
-				  metric="accuracy",
-				  decay=decay)
+		early_stopping = EarlyStopping("valid_loss", 0.001, 15)
+		model.add(layer=Linear(n_features, 32, init=init_type, regularization=regularization), activation="tanh")
+		model.add(layer=Linear(32, 16, init=init_type, regularization=regularization), activation="tanh")
+		model.add(layer=Linear(16, n_classes, init=init_type, regularization=regularization), activation="softmax")	
+	model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", learning_rate=learning_rate, metric="accuracy", decay=decay)
 	model.summary()
 	model.fit(X_train, 
 			  y_train, 
@@ -116,10 +99,10 @@ def reconstruction_mlp(dataset, size_latent_space):
 	init_type = "xavier"
 	learning_rate = 1e-4 ## 5e-4 works well for 64/16 latent space dim
 	decay = 1e-4
-	regularization_lambda = 1e-9 
+	regularization = 1e-9 
 	n_epochs = 100
 	train_split = 0.8
-	early_stopping = {"patience": 10, "metric": "valid_loss", "min_delta": 0.001}
+	early_stopping = EarlyStopping("valid_loss", 0.001, 10)
 	## Now we split to get validation set for the model training but this time we
 	## don't need y labels for the autoencoder. Although it will be usefull to keep it
 	## in order to train a classifier with the latent space representation made by our
@@ -129,34 +112,13 @@ def reconstruction_mlp(dataset, size_latent_space):
 	X_train, X_valid, X_test, y_test = X_train[:size], X_valid[:size], X_test[:size], y_test[:size]
 	## Building and training autoencoder model
 	model = Sequential()
-	model.add(layer=Linear(n_features, 
-						   256, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
-	model.add(layer=Linear(256, 
-						   64, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
-	model.add(layer=Linear(64, 
-						   size_latent_space, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
-	model.add(layer=Linear(size_latent_space, 
-						   64, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
-	model.add(layer=Linear(64, 
-						   256, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="tanh")
-	model.add(layer=Linear(256, 
-						   n_classes, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="sigmoid")
-	model.compile(loss="binary_crossentropy", 
-				  optimizer="sgd",
-				  learning_rate=learning_rate,
-				  decay=decay)
+	model.add(layer=Linear(n_features, 256, init=init_type, regularization=regularization), activation="tanh")
+	model.add(layer=Linear(256, 64, init=init_type, regularization=regularization), activation="tanh")
+	model.add(layer=Linear(64, size_latent_space, init=init_type, regularization=regularization), activation="tanh")
+	model.add(layer=Linear(size_latent_space, 64, init=init_type, regularization=regularization), activation="tanh")
+	model.add(layer=Linear(64, 256, init=init_type, regularization=regularization), activation="tanh")
+	model.add(layer=Linear(256, n_classes, init=init_type, regularization=regularization), activation="sigmoid")
+	model.compile(loss="binary_crossentropy", optimizer="sgd", learning_rate=learning_rate, decay=decay)
 	model.summary()
 	model.fit(X_train, 
 			  X_train, 
@@ -180,13 +142,13 @@ def reconstruction_mlp(dataset, size_latent_space):
 	## in classification. It should take way less time since we performed dimensionality
 	## reduction. Here we have only two layers in the encoder so we will take some of our
 	## test data and get their representation in our latent space.
-	model._network[0].forward(X_test) ## This layer is the first linear one
-	model._network[1].forward(model._network[0]._output) ## This layer is first activation function 
-	model._network[2].forward(model._network[1]._output) ## This layer is the second linear layer
-	model._network[3].forward(model._network[2]._output) ## This layer is the second activation function
-	model._network[4].forward(model._network[3]._output) ## This layer is the third linear layer
-	model._network[5].forward(model._network[4]._output) ## This layer is the third activation function
-	latent_space_X = model._network[5]._output ## Here we get the output and it's already normalized by tanh
+	model._net[0].forward(X_test) ## This layer is the first linear one
+	model._net[1].forward(model._network[0]._output) ## This layer is first activation function 
+	model._net[2].forward(model._network[1]._output) ## This layer is the second linear layer
+	model._net[3].forward(model._network[2]._output) ## This layer is the second activation function
+	model._net[4].forward(model._network[3]._output) ## This layer is the third linear layer
+	model._net[5].forward(model._network[4]._output) ## This layer is the third activation function
+	latent_space_X = model._net[5]._output ## Here we get the output and it's already normalized by tanh
 	latent_space_y = y_test ## We kept track of the labels in order to train the next classifier
 	print("X shape before compression :", X_test.shape)
 	print("X shape after compression :", latent_space_X.shape)
@@ -245,43 +207,22 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	init_type = "xavier"
 	learning_rate = 5e-5 ## Test 1e-3 comme pr 0.1
 	decay = learning_rate*10
-	regularization_lambda = 1e-9 
+	regularization = 1e-9 
 	n_epochs = 100
 	train_split = 0.8
-	early_stopping = {"patience": 15, "metric": "valid_loss", "min_delta": 0.001}
+	early_stopping = EarlyStopping("valid_loss", 0.001, 15)
 	X_train_noise, X_valid_noise = split_X(X_noise, train_split=train_split, shuffle=False)
 	X_train, X_valid = split_X(X, train_split=train_split, shuffle=False)
 	## Building and training autoencoder model
 	model = Sequential()
-	model.add(layer=Linear(n_features, 
-						   256, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="relu")
-	model.add(layer=Linear(256, 
-						   180, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="relu")
+	model.add(layer=Linear(n_features, 256, init=init_type, regularization=regularization), activation="relu")
+	model.add(layer=Linear(256, 180, init=init_type, regularization=regularization), activation="relu")
 	model.add(layer=Dropout(rate=0.1))
-	model.add(layer=Linear(180, 
-						   128, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="relu")
-	model.add(layer=Linear(128, 
-						   180, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="relu")
-	model.add(layer=Linear(180, 
-						   256, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="relu")
-	model.add(layer=Linear(256, 
-						   n_classes, 
-						   init_type=init_type, 
-						   regularization_lambda=regularization_lambda), activation="sigmoid")
-	model.compile(loss="binary_crossentropy", 
-				  optimizer="sgd",
-				  learning_rate=learning_rate,
-				  decay=decay)
+	model.add(layer=Linear(180, 128, init=init_type, regularization=regularization), activation="relu")
+	model.add(layer=Linear(128, 180, init=init_type, regularization=regularization), activation="relu")
+	model.add(layer=Linear(180, 256, init=init_type, regularization=regularization), activation="relu")
+	model.add(layer=Linear(256, n_classes, init=init_type, regularization=regularization), activation="sigmoid")
+	model.compile(loss="binary_crossentropy", optimizer="sgd", learning_rate=learning_rate, decay=decay)
 	model.summary()
 	model.fit(X_train_noise, 
 			  X_train, 

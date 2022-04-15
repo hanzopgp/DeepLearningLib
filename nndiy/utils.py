@@ -1,6 +1,5 @@
 import numpy as np
-
-DIVIDE_BY_ZERO_EPS = 1e-9
+from nndiy.core import DIVIDE_BY_ZERO_EPS
 
 
 def one_hot(y, n_class):
