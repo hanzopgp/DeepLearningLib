@@ -24,10 +24,15 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       └── LICENSE  
 </pre></code>
 
-## Implementation not seen in Project architecture
+## Features implemented
 
-- Xavier initialization
-- L2 regularisation
+- Linear/Convo1D/MaxPoolD/Flatten/Dropout layers
+- GD/MGD/SGD/ADAM optimizers
+- LearkyReLU/ReLU/Identity/Tanh/Sigmoid/Softmax activation functions
+- MAE/MSE/RMSE/BCE/SBCE/CCE/SCCE/SCCESoftmax loss functions
+- Uniform/Xavier initialization
+- L1/L2 regularisation
+- EarlyStopping callback
 
 ## Experiences
 
@@ -36,3 +41,4 @@ All those experiments were done on MNIST digits and fashion datasets :
 - Autoencoder image reconstruction (with different latent space dimensions)
 - Autoencoder removing noise (with different percentage of noise)
 - Multi layer perceptron image classification with latent space representation (using different dimension)
+- SGD/ADAM/Tanh/ReLU benchmarks on MNIST
