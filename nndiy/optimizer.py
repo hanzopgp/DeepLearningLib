@@ -90,16 +90,17 @@ class MinibatchGradientDescent(GradientDescent):
 
 
 class Adam(nndiy.core.Optimizer):
-	def __init__(self, network, learning_rate, decay, n_batch, b1=0.9, b2=0.999, alpha=1e-3, eps=1e-8):
+	def __init__(self, network, learning_rate, decay, n_batch, b1=0.9, b2=0.999, eps=1e-8):
 		super().__init__(network, learning_rate, decay, n_batch)
-		self._mw = 0
-		self._vw = 0
-		self._mb = 0
-		self._vb = 0
+		self._mw = []
+		self._vw = []
+		self._mb = []
+		self._vb = []
 		self._b1 = b1
 		self._b2 = b2
-		self._alpha = alpha
 		self._eps = eps
+		self._cpt_layer = 0
+		self._init_shapes = [False, False, False]
 
 	def step(self, X, y, n_epochs, verbose, early_stopping):
 		self._make_es_handler(early_stopping)
@@ -113,6 +114,8 @@ class Adam(nndiy.core.Optimizer):
 				self._seq._backward()
 				for l in self._seq._net:
 					self._update_layer_params(l, cpt_epoch)
+				# Reset layer index
+				self._cpt_layer = 0
 			stats = self._seq._update_stats()
 			if verbose:
 				self._show_updates(cpt_epoch, *stats)
@@ -126,17 +129,25 @@ class Adam(nndiy.core.Optimizer):
 
 	def _update_layer_params(self, l, cpt_epoch):
 		if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.convolution.Convo1D):
+			# Init if not done
+			if not self._init_shapes[self._cpt_layer]:
+				self._mw.append(np.zeros_like(l._grad_W))
+				self._vw.append(np.zeros_like(l._grad_W))
+				self._mb.append(np.zeros_like(l._grad_b))
+				self._vb.append(np.zeros_like(l._grad_b))
+				self._init_shapes[self._cpt_layer] = True
+
 			# Compute momentums
-			mw = (1 - self._b1) * l._grad_W
-			vw = (1 - self._b2) * np.power(l._grad_W, 2)
-			mb = (1 - self._b1) * l._grad_b
-			vb = (1 - self._b2) * np.power(l._grad_b, 2)
+			self._mw[self._cpt_layer] = self._b1 * self._mw[self._cpt_layer] + (1 - self._b1) * l._grad_W
+			self._vw[self._cpt_layer] = self._b2 * self._vw[self._cpt_layer] + (1 - self._b2) * np.power(l._grad_W, 2)
+			self._mb[self._cpt_layer] = self._b1 * self._mb[self._cpt_layer] + (1 - self._b1) * l._grad_b
+			self._vb[self._cpt_layer] = self._b2 * self._vb[self._cpt_layer] + (1 - self._b2) * np.power(l._grad_b, 2)
 			
 			# Compute corrections
-			mw_hat = mw / (1 - self._b1 ** cpt_epoch)
-			vw_hat = vw / (1 - self._b2 ** cpt_epoch)
-			mb_hat = mb / (1 - self._b1 ** cpt_epoch)
-			vb_hat = vb / (1 - self._b2 ** cpt_epoch)
+			mw_hat = self._mw[self._cpt_layer] / (1 - self._b1 ** cpt_epoch)
+			vw_hat = self._vw[self._cpt_layer] / (1 - self._b2 ** cpt_epoch)
+			mb_hat = self._mb[self._cpt_layer] / (1 - self._b1 ** cpt_epoch)
+			vb_hat = self._vb[self._cpt_layer] / (1 - self._b2 ** cpt_epoch)
 			
 			# Update parameters
 			w_update = self._lr * mw_hat / np.where(vw_hat > 0, vw_hat**0.5, self._eps)
@@ -144,4 +155,10 @@ class Adam(nndiy.core.Optimizer):
 			l._W -= w_update
 			l._b -= b_update
 
+			# Reset gradients after update
 			l.zero_grad()
+
+			# Go to next layer index
+			self._cpt_layer += 1
+
+
