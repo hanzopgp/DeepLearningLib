@@ -15,10 +15,10 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       |    ├── layer.py           (Contains the layers object such as Linear/Dropout...)
       |    ├── loss.py            (Contains the loss objects such as MSE/BCE...)
       |    ├── optimizer.py       (Contains the optimizer objects such as SGD/ADAM...)
-      |    ├── utils.py           (Contains the utility functions such as min_max_scale/one_hot...)
+      |    └── utils.py           (Contains the utility functions such as min_max_scale/one_hot...)
       ├── experiences.py          (Contains the MLP/AE/CNN experiences)
       ├── main.py                 (Contains the demo)
-      └── unit_test.py            (Contains unit tests on simple problems) 
+      ├── unit_test.py            (Contains unit tests on simple problems) 
       ├── report/                 (Folder containing the image and report)	
       ├── README.md		          
       └── LICENSE  
