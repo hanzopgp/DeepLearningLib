@@ -63,7 +63,7 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 							init_type=init_type, 
 							regularization_lambda=regularization_lambda), activation="softmax")	
 	model.compile(loss="sparse_categorical_crossentropy", 
-				  optimizer="adam",
+				  optimizer="sgd",
 				  learning_rate=learning_rate,
 				  metric="accuracy",
 				  decay=decay)
