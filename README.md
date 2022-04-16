@@ -42,3 +42,4 @@ All those experiments were done on MNIST digits and fashion datasets :
 - Autoencoder removing noise (with different percentage of noise)
 - Multi layer perceptron image classification with latent space representation (using different dimension)
 - SGD/ADAM/Tanh/ReLU benchmarks on MNIST
+- 1D CNN on MNIST
