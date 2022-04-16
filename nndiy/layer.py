@@ -107,7 +107,7 @@ class MaxPool1D(nndiy.core.Module):
 		self._channels_size = inp.shape[2]
 		tmp = [] # This array contains the would output
 		for b in range(self._batch_size): # For each element of the batch
-			tmp_e = [] # This array contains the array of max_values for one element
+			tmp_e = [] # This array contains the array of max values for one element
 			dim = self._input[b].shape[0]
 			for j in range(self._input[b].shape[1]): # For each dimension of the element
 				tmp_max = [] # This array contains our max() values of one window
@@ -131,6 +131,48 @@ class MaxPool1D(nndiy.core.Module):
 					# We get the index of maximum values
 					max_index = np.where(arr==max)[0][0]
 					# And we backward the delta from previous layer only where the values are max
+					tmp[x, i*self._stride+max_index, c]=self._delta[x,i,c]
+		self._new_delta = tmp
+
+	def backward_update_gradient(self, delta):
+		self._delta = delta
+
+
+class AvgPool1D(nndiy.core.Module):
+	def __init__(self, kernel_size:int, stride=1):
+		self._ksz = kernel_size
+		self._stride = stride
+
+	def forward(self, inp:np.ndarray):
+		self._input = inp
+		self._batch_size = inp.shape[0]
+		self._channels_size = inp.shape[2]
+		tmp = [] # This array contains the would output
+		for b in range(self._batch_size): # For each element of the batch
+			tmp_e = [] # This array contains the array of mean values for one element
+			dim = self._input[b].shape[0]
+			for j in range(self._input[b].shape[1]): # For each dimension of the element
+				tmp_mean = [] # This array contains our mean() values of one window
+				for i in range(0, dim, self._stride): # For each rows
+					if i + self._ksz <= dim: # If our sliding window is in range
+						mean = (self._input[b, i:i+self._ksz, j]).mean() # We compute the mean
+						tmp_mean.append(mean)
+				tmp_e.append(tmp_mean)
+			tmp.append(np.array(tmp_e).T)
+		self._output = np.array(tmp)
+
+	def backward(self):
+		tmp = np.zeros_like(self._input)
+		for x in range(self._batch_size): # For each element
+			for c in range(self._channels_size): # For each channels
+				for i in range(self._delta.shape[1]): # For each index
+					# This is the array we are looking at according to the kernel size and stride
+					arr = self._input[x, i*self._stride:i*self._stride+self._ksz, c]
+					# This is the mean value of the array we are looking at
+					mean = (self._input[x, i*self._stride:i*self._stride+self._ksz, c]).mean()
+					# We get the index of mean values
+					max_index = np.where(arr==mean)[0][0]
+					# And we backward the delta from previous layer only where the values are mean
 					tmp[x, i*self._stride+max_index, c]=self._delta[x,i,c]
 		self._new_delta = tmp
 
