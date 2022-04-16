@@ -26,7 +26,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
 
 ## Features implemented
 
-- Linear/Convo1D/MaxPoolD/Flatten/Dropout layers
+- Linear/Convo1D/MaxPoo1D/Flatten/Dropout layers
 - GD/MGD/SGD/ADAM optimizers
 - LearkyReLU/ReLU/Identity/Tanh/Sigmoid/Softmax activation functions
 - MAE/MSE/RMSE/BCE/SBCE/CCE/SCCE/SCCESoftmax loss functions
