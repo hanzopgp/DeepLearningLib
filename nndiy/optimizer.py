@@ -1,7 +1,7 @@
 import numpy as np
+from tqdm import tqdm
 import nndiy.core
 import nndiy.layer
-import nndiy.convolution
 
 
 class GradientDescent(nndiy.core.Optimizer):
@@ -24,7 +24,7 @@ class GradientDescent(nndiy.core.Optimizer):
 				break
 
 	def _update_layer_params(self, l):
-		if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.convolution.Convo1D):
+		if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.layer.Convo1D):
 			l._W -= (self._lr * l._grad_W) - (l._lambda * l._W)
 			l._b -= (self._lr * l._grad_b) - (l._lambda * l._b)
 			l.zero_grad()
@@ -38,7 +38,8 @@ class StochasticGradientDescent(GradientDescent):
 		for cpt_epoch in range(1, n_epochs + 1):
 			np.random.shuffle(idx_order)
 			for i in idx_order:
-				x_elem, y_elem = X[i].reshape(1, -1), y[i].reshape(1, -1)
+				# x_elem, y_elem = X[i].reshape(1, -1), y[i].reshape(1, -1)
+				x_elem, y_elem = np.expand_dims(X[i], axis=0), np.expand_dims(y[i], axis=0)
 				self._seq._forward(x_elem, y_elem)
 				self._seq._backward()
 				for l in self._seq._net:
@@ -109,8 +110,8 @@ class Adam(nndiy.core.Optimizer):
 		idx_order = np.arange(n)
 		for cpt_epoch in range(1, n_epochs + 1):
 			np.random.shuffle(idx_order)
-			for idx in idx_order:
-				x_elem, y_elem = X[idx].reshape(1, -1), y[idx].reshape(1, -1)
+			for idx in tqdm(idx_order):
+				x_elem, y_elem = np.expand_dims(X[idx], axis=0), np.expand_dims(y[idx], axis=0)
 				self._seq._forward(x_elem, y_elem)
 				self._seq._backward()
 				for i, l in enumerate(self._seq._net):
@@ -127,7 +128,7 @@ class Adam(nndiy.core.Optimizer):
 				break
 
 	def _update_layer_params(self, idx, l, cpt_epoch):
-		if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.convolution.Convo1D):
+		if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.layer.Convo1D):
 			# Init if not done
 			if not self._init_adam[idx]:
 				self._mw[idx] = np.zeros_like(l._grad_W)

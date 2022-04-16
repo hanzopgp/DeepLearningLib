@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from nndiy.utils import one_hot, min_max_scaler, split_data, split_X
 from nndiy import Sequential
-from nndiy.layer import Linear, Dropout
+from nndiy.layer import Linear, Dropout, Convo1D, MaxPool1D, Flatten
 from nndiy.early_stopping import EarlyStopping
 
 np.random.seed(42)
@@ -13,7 +13,7 @@ np.random.seed(42)
 label_name_fashion_mnist = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 label_name_digits_mnist = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
-def execute_classification_model(X, y, X_test, y_test, label_name, latent=False):
+def execute_mlp_classification_model(X, y, X_test, y_test, label_name, latent=False):
 	if not latent:
 		width = X.shape[1]
 		height = X.shape[2]
@@ -76,7 +76,7 @@ def classification_mlp(dataset):
 		loader = tf.keras.datasets.mnist
 		label_name = label_name_digits_mnist     
 	(X, y), (X_test, y_test) = loader.load_data()
-	execute_classification_model(X, y, X_test, y_test, label_name)
+	execute_mlp_classification_model(X, y, X_test, y_test, label_name)
 
 def reconstruction_mlp(dataset, size_latent_space):
 	## Loading fashion MNIST dataset
@@ -244,11 +244,82 @@ def remove_noise_autoencoder(dataset, noise_amount):
 		plt.imshow(X_test[i].reshape(width, height))
 		plt.title("Ground truth image")
 		plt.show()
+
+def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
+	## Normalizing our data
+	X = min_max_scaler(X, 0, 1)
+	X_test = min_max_scaler(X_test, 0, 1)
+	## Subsampling to avoid number of parameters exploding
+	X, X_test = X[:,::2,::2], X_test[:,::2,::2] 
+	width = X.shape[1]
+	height = X.shape[2]
+	## Reshaping our channels 
+	if len(X.shape) == 3:
+		X = X.reshape(X.shape[0], -1)[:,:, np.newaxis]
+		X_test = X_test.reshape(X_test.shape[0], -1)[:,:, np.newaxis]
+	else:
+		X = X.reshape(X.shape[0], -1, X.shape[3])
+		X_test = X_test.reshape(X_test.shape[0], -1, X_test.shape[3])
+	## Main variables
+	learning_rate = 1e-4
+	decay = learning_rate * 5
+	train_split = 0.8
+	## Splitting to get validation set
+	X_train, X_valid, y_train, y_valid = split_data(X, y, train_split=train_split, shuffle=True)
+	size = 10_000
+	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
+	## Building and training model
+	model = Sequential()
+	n_epochs = 10
+	early_stopping = EarlyStopping("valid_loss", 0.001, 5)
+	model.add(Convo1D(3, 1, 32), "relu")
+	model.add(MaxPool1D(2,2), "identity")
+	model.add(Flatten(), "identity")
+	model.add(layer=Linear(3136, 
+						   100, 
+						   init="xavier"), 
+						   activation="relu")
+	model.add(layer=Linear(100, 
+						   10, 
+						   init="xavier"), 
+						   activation="softmax")
+	model.compile(loss="sparse_categorical_crossentropy", 
+				  optimizer="adam",
+				  learning_rate=learning_rate,
+				  metric="accuracy",
+				  decay=decay)
+	model.summary()
+	model.fit(X_train, 
+			  y_train, 
+			  X_valid, 
+			  y_valid, 
+			  n_epochs=n_epochs, 
+			  verbose=True,
+			  early_stopping=early_stopping)
+	model.plot_stats()
+	## Show results
+	X_test = X_test[:5]
+	preds = np.argmax(model.predict(X_test), axis=1)
+	for i in range(3):
+		plt.imshow(X_test[i].reshape(width, height))
+		plt.title(str("Prediction :" + label_name[preds[i]] + " Ground truth label :" + str(y_test[i])))
+		plt.show()
+
+def classification_cnn(dataset):
+	## Loading dataset
+	if dataset == "fashion_mnist":
+		loader = tf.keras.datasets.fashion_mnist
+		label_name = label_name_fashion_mnist 
+	elif dataset == "digits_mnist":     
+		loader = tf.keras.datasets.mnist
+		label_name = label_name_digits_mnist     
+	(X, y), (X_test, y_test) = loader.load_data()
+	execute_cnn_classification_model(X, y, X_test, y_test, label_name)
 	
 
 ## Classic classification with a MLP model
 # classification_mlp("fashion_mnist")
-classification_mlp("digits_mnist")
+# classification_mlp("digits_mnist")
 
 ## Autoencoder reconstruction + classification with latent space
 # reconstruction_mlp("fashion_mnist", 16)
@@ -260,4 +331,4 @@ classification_mlp("digits_mnist")
 
 ## Classic classification with a CNN model
 # classification_cnn("fashion_mnist")
-# classification_cnn("digits_mnist")
+classification_cnn("digits_mnist")

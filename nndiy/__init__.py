@@ -7,7 +7,6 @@ import nndiy.activation
 import nndiy.loss
 import nndiy.optimizer
 import nndiy.layer
-import nndiy.convolution
 
 
 NN_METRIC_ARGS = (None, 'accuracy')
@@ -160,12 +159,12 @@ class Sequential():
 			if isinstance(l, nndiy.layer.Linear):
 				print(f"({n}) Linear layer with parameters of shape {l._W.shape}")
 				n += 1
-			elif isinstance(l, nndiy.convolution.Convo1D):
+			elif isinstance(l, nndiy.layer.Convo1D):
 				print(f"({n}) Convolution layer with parameters of shape {l._W.shape}")
 				n += 1
-			elif isinstance(l, nndiy.convolution.MaxPool1D):
+			elif isinstance(l, nndiy.layer.MaxPool1D):
 				print(f"  ---- Max Pooling layer")
-			elif isinstance(l, nndiy.convolution.Flatten):
+			elif isinstance(l, nndiy.layer.Flatten):
 				print(f"  ---- Flatten layer")
 			elif isinstance(l, nndiy.layer.Dropout):
 				print(f"({n}) Dropout layer with rate {l._rate}")
@@ -180,6 +179,6 @@ class Sequential():
 	def count_params(self) -> int:
 		res = 0
 		for l in self._net:
-			if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.convolution.Convo1D):
+			if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.layer.Convo1D):
 				res += l._W.size + l._b.size
 		return res
