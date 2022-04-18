@@ -95,8 +95,7 @@ class Sequential():
 		"""Back propagate the output's gradient from the last to the first layer"""
 		for i in range(len(self._net) - 1, 0, -1):
 			self._net[i].backward()
-			delta = self._net[i]._new_delta
-			self._net[i-1].backward_update_gradient(delta)
+			self._net[i-1].backward_update_gradient(self._net[i]._grad_output)
 
 	def _init_stats(self):
 		self._train_loss_values = []

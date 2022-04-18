@@ -19,7 +19,7 @@ class GradientDescent(nndiy.core.Optimizer):
 			# Recalculate learning rate using decay and number of epoch
 			self._lr *= (1 / (1 + self._decay * cpt_epoch))
 
-			if self._es.update(cpt_epoch, stats):
+			if self._es and self._es.update(cpt_epoch, stats):
 				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_cpt_epoch)
 				break
 
@@ -51,7 +51,7 @@ class StochasticGradientDescent(GradientDescent):
 			# Recalculate learning rate using decay and number of epoch
 			self._lr *= (1 / (1 + self._decay * cpt_epoch))
 
-			if self._es.update(cpt_epoch, stats):
+			if self._es and self._es.update(cpt_epoch, stats):
 				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_cpt_epoch)
 				break
 
@@ -76,7 +76,7 @@ class MinibatchGradientDescent(GradientDescent):
 			# Recalculate learning rate using decay and number of epoch
 			self._lr *= (1 / (1 + self._decay * cpt_epoch))
 
-			if self._es.update(cpt_epoch, stats):
+			if self._es and self._es.update(cpt_epoch, stats):
 				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_cpt_epoch)
 				break
 
@@ -123,7 +123,7 @@ class Adam(nndiy.core.Optimizer):
 			# Recalculate learning rate using decay and number of epoch
 			self._lr *= (1 / (1 + self._decay * cpt_epoch))
 
-			if self._es.update(cpt_epoch, stats):
+			if self._es and self._es.update(cpt_epoch, stats):
 				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_cpt_epoch)
 				break
 
