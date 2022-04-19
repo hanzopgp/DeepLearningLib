@@ -76,7 +76,6 @@ class Convo1D(nndiy.core.Module):
 				for c in range(chan_out):
 					kernel = W[c, :, :]
 					output[b, idx_out, c] = np.sum(kernel * window)
-				# output[b, idx_out, :] = np.sum(W * window, axis=(1,2))
 			idx_out += 1
 		return output
 
@@ -88,18 +87,6 @@ class Convo1D(nndiy.core.Module):
 
 		self._input = inp
 		self._output = self.forward_nb(self._W, inp, self._stride)
-		# d_out = (self._length - self._ksz) // self._stride + 1
-		# self._output = np.zeros((self._batch_sz, d_out, self._chan_out))
-		
-		# # Parallelizing may be possible here
-		# idx_out = 0
-		# for i in range(0, self._length, self._stride):
-		# 	if idx_out == d_out:
-		# 		break
-		# 	for b in range(self._batch_sz):	# Need to find a way to process batch with numpy rather than looping here
-		# 		window = inp[b, i:i+self._ksz, :]
-		# 		self._output[b, idx_out, :] = np.sum(self._W * window, axis=(1,2))
-		# 	idx_out += 1
 
 	@staticmethod
 	@njit
@@ -117,28 +104,15 @@ class Convo1D(nndiy.core.Module):
 			for c in range(chan_out):
 				for b in range(batch_sz):
 					kernel = W[c, :, :]	# ksz, chan_in
-					grad_input[b, i:i+ksz, :] += kernel[::-1, :] * delta[b, idx_out, c]
+					grad_input[b, i:i+ksz, :] += kernel * delta[b, idx_out, c]
 					grad_W[c, :, :] += inp[b, i:i+ksz, :] * delta[b, idx_out, c]
 			idx_out += 1
-		return grad_input, grad_W
+		return grad_input, grad_W/batch_sz
 
 	def backward(self):
 		# output: (batch_sz, length, chan_in)
 		self._grad_input, self._grad_W = self.backward_nb(self._W, self._input, self._delta, self._stride)
-		# self._grad_input = np.zeros_like(self._input)
-		# d_out = self._output.shape[1]
-		# idx_out = 0
-		# for i in range(0, self._length, self._stride):
-		# 	if idx_out == d_out:
-		# 		break
-		# 	for c in range(self._chan_out):
-		# 		for b in range(self._batch_sz):
-		# 			kernel = self._W[c, :, :]	# ksz, chan_in
-		# 			self._grad_input[b, i:i+self._ksz, :] += kernel * self._delta[b, idx_out, c]
-		# 			self._grad_W[c, :, :] += self._input[b, i:i+self._ksz, :] * self._delta[b, idx_out, c]
-		# 	idx_out += 1
 					
-
 	def backward_update_gradient(self, delta):
 		# delta: (batch_sz, d_out, chan_out)
 		self._delta = delta
@@ -177,23 +151,6 @@ class MaxPool1D(nndiy.core.Module):
 	def forward(self, inp:np.ndarray):
 		self._length = inp.shape[1]
 		self._output, self._saved_argmax = self.forward_nb(inp, self._ksz, self._stride)
-		# if self._mask is None:
-		# 	self._mask = np.zeros(inp.shape, dtype=np.uint8)
-		# batch_sz, length, chan = inp.shape
-		# d_out = int(np.floor((length - self._ksz) / self._stride)) + 1
-		# self._input = inp
-		# self._output = np.zeros((batch_sz, d_out, chan))
-
-		# idx_out = 0
-		# for i in range(0, length, self._stride):
-		# 	if idx_out == d_out:
-		# 		break
-		# 	for b in range(batch_sz):	# Need to find a way to process batch with numpy rather than loopoig here
-		# 		window = inp[b,i:i+self._ksz,:]
-		# 		self._output[b,idx_out,:] = np.max(window, axis=0)
-		# 		argmax = np.argmax(window, axis=0)
-		# 		self._mask[b,argmax+i,np.arange(argmax.shape[0])] = 1
-		# 	idx_out += 1
 
 	@staticmethod
 	@njit
