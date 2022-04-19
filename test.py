@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	model.add(Linear(100, 10), activation="softmax")
 	model.compile(
 		loss="sparse_categorical_crossentropy",
-		optimizer="gd",
+		optimizer="sgd",
 		learning_rate=1e-3,
 		metric="accuracy"
 	)
