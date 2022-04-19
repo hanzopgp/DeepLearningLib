@@ -20,7 +20,7 @@ Librairies for deep learning (MLP/CNN/Auto-Encoder etc...).
       ├── main.py                 (Contains the demo)
       ├── unit_test.py            (Contains unit tests on simple problems) 
       ├── report/                 (Folder containing the image and report)
-      |    ├── img_report
+      |    ├── img_report/
       |    └── report.pdf         
       ├── README.md		          
       └── LICENSE  
