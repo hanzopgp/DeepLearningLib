@@ -14,14 +14,21 @@ def load_usps(fn):
 
 
 if __name__ == '__main__':
+	np.random.seed(42)
 	X_train, y_train = load_usps(USPS_TRAIN)
 	X_test, y_test = load_usps(USPS_TEST)
 	X_train, X_test = X_train[..., np.newaxis], X_test[..., np.newaxis]
+	# y_train, y_test = y_train[..., np.newaxis], y_test[..., np.newaxis]
 
 	model = Sequential()
-	model.add(Convo1D(3, 1, 32), activation="identity")
-	model.add(MaxPool1D(2, 2), activation="identity")
-	model.add(Flatten(), activation="identity")
+	# model.add(Convo1D(3, 1, 32), activation="identity")
+	# model.add(MaxPool1D(2, 2), activation="identity")
+	# model.add(Flatten(), activation="identity")
+	model._net = [
+		Convo1D(3, 1, 32),
+		MaxPool1D(2,2),
+		Flatten()
+	]
 	model.add(Linear(4064, 100), activation="relu")
 	model.add(Linear(100, 10), activation="softmax")
 	model.compile(
