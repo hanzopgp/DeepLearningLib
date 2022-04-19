@@ -7,20 +7,20 @@ import nndiy.layer
 class GradientDescent(nndiy.core.Optimizer):
 	def step(self, X, y, n_epochs, verbose, early_stopping):
 		self._make_es_handler(early_stopping)
-		for cpt_epoch in range(1, n_epochs + 1):
+		for ep in range(1, n_epochs + 1):
 			self._seq._forward(X, y)
 			self._seq._backward()
 			for l in self._seq._net:
 				self._update_layer_params(l)
 			stats = self._seq._update_stats()
 			if verbose:
-				self._show_updates(cpt_epoch, *stats)
+				self._show_updates(ep, *stats)
 			
 			# Recalculate learning rate using decay and number of epoch
-			self._lr *= (1 / (1 + self._decay * cpt_epoch))
+			self._lr *= (1 / (1 + self._decay * ep))
 
-			if self._es.update(cpt_epoch, stats):
-				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_cpt_epoch)
+			if self._es and self._es.update(ep, stats):
+				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_ep)
 				break
 
 	def _update_layer_params(self, l):
@@ -35,7 +35,7 @@ class StochasticGradientDescent(GradientDescent):
 		self._make_es_handler(early_stopping)
 		n = X.shape[0]
 		idx_order = np.arange(n)
-		for cpt_epoch in range(1, n_epochs + 1):
+		for ep in range(1, n_epochs + 1):
 			np.random.shuffle(idx_order)
 			for i in idx_order:
 				# x_elem, y_elem = X[i].reshape(1, -1), y[i].reshape(1, -1)
@@ -46,13 +46,13 @@ class StochasticGradientDescent(GradientDescent):
 					self._update_layer_params(l)
 			stats = self._seq._update_stats()
 			if verbose:
-				self._show_updates(cpt_epoch, *stats)
+				self._show_updates(ep, *stats)
 			
 			# Recalculate learning rate using decay and number of epoch
-			self._lr *= (1 / (1 + self._decay * cpt_epoch))
+			self._lr *= (1 / (1 + self._decay * ep))
 
-			if self._es.update(cpt_epoch, stats):
-				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_cpt_epoch)
+			if self._es and self._es.update(ep, stats):
+				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_ep)
 				break
 
 
@@ -61,7 +61,7 @@ class MinibatchGradientDescent(GradientDescent):
 		self._make_es_handler(early_stopping)
 		batches_X, batches_y = self._make_batches(X, y)
 		n = batches_X.shape[0]
-		for cpt_epoch in range(1, n_epochs + 1):
+		for ep in range(1, n_epochs + 1):
 			for _ in range(n):
 				i = np.random.randint(n)
 				batch_X, batch_y = batches_X[i], batches_y[i]
@@ -71,13 +71,13 @@ class MinibatchGradientDescent(GradientDescent):
 					self._update_layer_params(l)
 			stats = self._seq._update_stats()
 			if verbose:
-				self._show_updates(cpt_epoch, *stats)
+				self._show_updates(ep, *stats)
 			
 			# Recalculate learning rate using decay and number of epoch
-			self._lr *= (1 / (1 + self._decay * cpt_epoch))
+			self._lr *= (1 / (1 + self._decay * ep))
 
-			if self._es.update(cpt_epoch, stats):
-				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_cpt_epoch)
+			if self._es and self._es.update(ep, stats):
+				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_ep)
 				break
 
 	def _make_batches(self, X:np.ndarray, y:np.ndarray):
@@ -108,26 +108,26 @@ class Adam(nndiy.core.Optimizer):
 		self._make_es_handler(early_stopping)
 		n = X.shape[0]
 		idx_order = np.arange(n)
-		for cpt_epoch in range(1, n_epochs + 1):
+		for ep in range(1, n_epochs + 1):
 			np.random.shuffle(idx_order)
 			for idx in tqdm(idx_order):
 				x_elem, y_elem = np.expand_dims(X[idx], axis=0), np.expand_dims(y[idx], axis=0)
 				self._seq._forward(x_elem, y_elem)
 				self._seq._backward()
 				for i, l in enumerate(self._seq._net):
-					self._update_layer_params(i, l, cpt_epoch)
+					self._update_layer_params(i, l, ep)
 			stats = self._seq._update_stats()
 			if verbose:
-				self._show_updates(cpt_epoch, *stats)
+				self._show_updates(ep, *stats)
 			
 			# Recalculate learning rate using decay and number of epoch
-			self._lr *= (1 / (1 + self._decay * cpt_epoch))
+			self._lr *= (1 / (1 + self._decay * ep))
 
-			if self._es.update(cpt_epoch, stats):
-				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_cpt_epoch)
+			if self._es and self._es.update(ep, stats):
+				print("--> Early stopping triggered and best model returned from epoch number", self._es.best_ep)
 				break
 
-	def _update_layer_params(self, idx, l, cpt_epoch):
+	def _update_layer_params(self, idx, l, ep):
 		if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.layer.Convo1D):
 			# Init if not done
 			if not self._init_adam[idx]:
@@ -144,10 +144,10 @@ class Adam(nndiy.core.Optimizer):
 			self._vb[idx] = self._b2 * self._vb[idx] + (1 - self._b2) * np.power(l._grad_b, 2)
 			
 			# Compute corrections
-			mw_hat = self._mw[idx] / (1 - self._b1 ** cpt_epoch)
-			vw_hat = self._vw[idx] / (1 - self._b2 ** cpt_epoch)
-			mb_hat = self._mb[idx] / (1 - self._b1 ** cpt_epoch)
-			vb_hat = self._vb[idx] / (1 - self._b2 ** cpt_epoch)
+			mw_hat = self._mw[idx] / (1 - self._b1 ** ep)
+			vw_hat = self._vw[idx] / (1 - self._b2 ** ep)
+			mb_hat = self._mb[idx] / (1 - self._b1 ** ep)
+			vb_hat = self._vb[idx] / (1 - self._b2 ** ep)
 			
 			# Update parameters
 			w_update = self._lr * mw_hat / np.where(vw_hat > 0, vw_hat**0.5, self._eps)

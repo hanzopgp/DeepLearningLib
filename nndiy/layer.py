@@ -1,5 +1,6 @@
 import numpy as np
 import nndiy.core
+from numba import njit
 
 
 LINEAR_INIT_ARGS = (None, 'xavier')
@@ -30,7 +31,7 @@ class Linear(nndiy.core.Module):
 		self._output = np.where(self._output < -OVERFLOW_THRESHOLD, -OVERFLOW_THRESHOLD, self._output)
 	
 	def backward(self):
-		self._new_delta = self._delta @ self._W.T
+		self._grad_input = self._delta @ self._W.T
 
 	def zero_grad(self):
 		self._grad_W = np.zeros_like(self._W)
@@ -41,140 +42,130 @@ class Linear(nndiy.core.Module):
 		self._grad_W += self._input.T @ delta
 		self._grad_b += np.sum(delta, axis=0)
 
+
 class Convo1D(nndiy.core.Module):
-	def __init__(self, kernel_size:int, chan_in:int, chan_out:int, stride=1):
-		self._W:np.ndarray = (np.random.rand(chan_out, kernel_size, chan_in) * 2 - 1) / np.sqrt(chan_in) # xavier-init
-		self._b:np.ndarray = np.zeros(chan_out)
+	def __init__(self, kernel_size:int, chan_in:int, chan_out:int, stride=1, regularization=1e-9):
 		self._ksz = kernel_size
-		self._stride = stride
 		self._chan_in = chan_in
 		self._chan_out = chan_out
-		self.zero_grad()
+		self._lambda = regularization
+
+		self._W:np.ndarray = (np.random.rand(chan_out, kernel_size, chan_in) * 2 - 1) / np.sqrt(chan_in)	# xavier-init
+		self._b = 0
+		self._stride = stride
+
+		self._grad_W = np.zeros_like(self._W)
+		self._grad_b = 0
 
 	def zero_grad(self):
-		self._grad_W = np.zeros_like(self._W)
-		self._grad_b = np.zeros_like(self._b)
+		pass
+
+	@staticmethod
+	@njit
+	def forward_nb(W, inp, stride):
+		chan_out, ksz, _ = W.shape
+		batch_sz, length, _ = inp.shape
+		d_out = (length - ksz) // stride + 1
+		output = np.zeros((batch_sz, d_out, chan_out))
+		idx_out = 0
+		for i in range(0, length, stride):
+			if idx_out == d_out:
+				break
+			for b in range(batch_sz):
+				window = inp[b, i:i+ksz, :]
+				for c in range(chan_out):
+					kernel = W[c, :, :]
+					output[b, idx_out, c] = np.sum(kernel * window)
+			idx_out += 1
+		return output
 
 	def forward(self, inp:np.ndarray):
+		# input : (batchsz, length, chan_in)
+		# output: (batchsz, d_out, chan_out)
+		assert inp.shape[2] == self._chan_in
+		self._batch_sz, self._length, _ = inp.shape
+
 		self._input = inp
-		self._batch_size = inp.shape[0]
-		tmp = []
-		for x in self._input: # For each element our batch
-			tmp_x = []
-			for filter in self._W: # For each filter of our layer
-				for i in range(0, x.shape[0], self._stride): # For each dimension of our input
-					x_in = x[i:i+self._stride] # We take the part we want to convolve (x_in)
-					tmp_x.append(sum(x_in*filter)) # We do the weighted sum which gives us tmp_x
-			tmp_x = np.array(tmp_x).reshape((self._W.shape[0], -1))
-			tmp.append(tmp_x.T) # We add the result of our filter on x_in after reshaping it
-		self._output = np.array(tmp)
-		# Clip output to avoid overflowing in activation layer
-		self._output = np.where(self._output > OVERFLOW_THRESHOLD, OVERFLOW_THRESHOLD, self._output)
-		self._output = np.where(self._output < -OVERFLOW_THRESHOLD, -OVERFLOW_THRESHOLD, self._output)
+		self._output = self.forward_nb(self._W, inp, self._stride)
+
+	@staticmethod
+	@njit
+	def backward_nb(W, inp, delta, stride):
+		chan_out, ksz, _ = W.shape
+		batch_sz, length, _ = inp.shape
+		d_out = delta.shape[1]
+
+		grad_input = np.zeros_like(inp)
+		grad_W = np.zeros_like(W)
+		idx_out = 0
+		for i in range(0, length, stride):
+			if idx_out == d_out:
+				break
+			for c in range(chan_out):
+				for b in range(batch_sz):
+					kernel = W[c, :, :]	# ksz, chan_in
+					grad_input[b, i:i+ksz, :] += kernel * delta[b, idx_out, c]
+					grad_W[c, :, :] += inp[b, i:i+ksz, :] * delta[b, idx_out, c]
+			idx_out += 1
+		return grad_input, grad_W/batch_sz
 
 	def backward(self):
-		tmp = []
-		for b in range(self._batch_size): # For each element of our batch
-			tmp_x = []
-			for f in range(self._W.shape[0]): # For each filter of our layer
-				for col_d in self._delta[b, :, f]: # Here we iterate on the columns of the deltas 
-					tmp_x.extend(np.multiply(self._W[f], col_d)) # Then we multiply is by each filters to get the gradient
-			tmp_x = np.array(tmp_x).reshape((self._chan_out, -1)).T
-			tmp.append(tmp_x) # Like in forward pass we get several gradients corresponding to each filters
-		self._new_delta = np.array(tmp)
-
+		# output: (batch_sz, length, chan_in)
+		self._grad_input, self._grad_W = self.backward_nb(self._W, self._input, self._delta, self._stride)
+					
 	def backward_update_gradient(self, delta):
+		# delta: (batch_sz, d_out, chan_out)
 		self._delta = delta
-		for b in range(self._batch_size): # For each element of our batch
-			for f in range(self._W.shape[0]): # For each filter of our layer
-				# We need to do some reshape on our inputs for further computation
-				tmp = self._input[b].reshape((self._input.shape[1] // self._stride, -1))
-				# As in linear layer we get the gradient with respect to the input
-				# by multiplying the input with the right delta values
-				self._grad_W[f] += tmp.T @ delta[b, :, f]
-				# The bias gradient is the sum of the residuals
-				self._grad_b[f] += np.sum(delta[b, :, f])
 
 
 class MaxPool1D(nndiy.core.Module):
 	def __init__(self, kernel_size:int, stride=1):
 		self._ksz = kernel_size
 		self._stride = stride
+		self._saved_argmax = None
+
+	def zero_grad(self):
+		pass
+
+	@staticmethod
+	@njit
+	def forward_nb(inp, ksz, stride):
+		batch_sz, length, chan = inp.shape
+		d_out = int(np.floor((length - ksz) / stride)) + 1
+		
+		output = np.zeros((batch_sz, d_out, chan))
+		saved_argmax = np.zeros_like(output, dtype=np.int32)
+
+		idx_out = 0
+		for i in range(0, length, stride):
+			if idx_out == d_out:
+				break
+			for b in range(batch_sz):
+				for c in range(chan):
+					window = inp[b, i:i+ksz, c]
+					output[b, idx_out, c] = np.max(window)
+					saved_argmax[b, idx_out, c] = np.argmax(window)
+			idx_out += 1
+		return output, saved_argmax
 
 	def forward(self, inp:np.ndarray):
-		self._input = inp
-		self._batch_size = inp.shape[0]
-		self._channels_size = inp.shape[2]
-		tmp = [] # This array contains the would output
-		for b in range(self._batch_size): # For each element of the batch
-			tmp_e = [] # This array contains the array of max values for one element
-			dim = self._input[b].shape[0]
-			for j in range(self._input[b].shape[1]): # For each dimension of the element
-				tmp_max = [] # This array contains our max() values of one window
-				for i in range(0, dim, self._stride): # For each rows
-					if i + self._ksz <= dim: # If our sliding window is in range
-						max = (self._input[b, i:i+self._ksz, j]).max() # We compute the maximum
-						tmp_max.append(max)
-				tmp_e.append(tmp_max)
-			tmp.append(np.array(tmp_e).T)
-		self._output = np.array(tmp)
+		self._length = inp.shape[1]
+		self._output, self._saved_argmax = self.forward_nb(inp, self._ksz, self._stride)
+
+	@staticmethod
+	@njit
+	def backward_nb(delta, length, stride, saved_argmax):
+		batch_sz, d_out, chan = delta.shape
+		grad_input = np.zeros((batch_sz, length, chan))
+
+		for b in range(batch_sz):
+			for c in range(chan):
+				for i in range(d_out):
+					grad_input[b, i*stride + saved_argmax[b, i, c], c] = delta[b, i, c]
+		return grad_input
 
 	def backward(self):
-		tmp = np.zeros_like(self._input)
-		for x in range(self._batch_size): # For each element
-			for c in range(self._channels_size): # For each channels
-				for i in range(self._delta.shape[1]): # For each index
-					# This is the array we are looking at according to the kernel size and stride
-					arr = self._input[x, i*self._stride:i*self._stride+self._ksz, c]
-					# This is the maximum value of the array we are looking at
-					max = (self._input[x, i*self._stride:i*self._stride+self._ksz, c]).max()
-					# We get the index of maximum values
-					max_index = np.where(arr==max)[0][0]
-					# And we backward the delta from previous layer only where the values are max
-					tmp[x, i*self._stride+max_index, c]=self._delta[x,i,c]
-		self._new_delta = tmp
-
-	def backward_update_gradient(self, delta):
-		self._delta = delta
-
-
-class AvgPool1D(nndiy.core.Module):
-	def __init__(self, kernel_size:int, stride=1):
-		self._ksz = kernel_size
-		self._stride = stride
-
-	def forward(self, inp:np.ndarray):
-		self._input = inp
-		self._batch_size = inp.shape[0]
-		self._channels_size = inp.shape[2]
-		tmp = [] # This array contains the would output
-		for b in range(self._batch_size): # For each element of the batch
-			tmp_e = [] # This array contains the array of mean values for one element
-			dim = self._input[b].shape[0]
-			for j in range(self._input[b].shape[1]): # For each dimension of the element
-				tmp_mean = [] # This array contains our mean() values of one window
-				for i in range(0, dim, self._stride): # For each rows
-					if i + self._ksz <= dim: # If our sliding window is in range
-						mean = (self._input[b, i:i+self._ksz, j]).mean() # We compute the mean
-						tmp_mean.append(mean)
-				tmp_e.append(tmp_mean)
-			tmp.append(np.array(tmp_e).T)
-		self._output = np.array(tmp)
-
-	def backward(self):
-		tmp = np.zeros_like(self._input)
-		for x in range(self._batch_size): # For each element
-			for c in range(self._channels_size): # For each channels
-				for i in range(self._delta.shape[1]): # For each index
-					# This is the array we are looking at according to the kernel size and stride
-					arr = self._input[x, i*self._stride:i*self._stride+self._ksz, c]
-					# This is the mean value of the array we are looking at
-					mean = (self._input[x, i*self._stride:i*self._stride+self._ksz, c]).mean()
-					# We get the index of mean values
-					max_index = np.where(arr==mean)[0][0]
-					# And we backward the delta from previous layer only where the values are mean
-					tmp[x, i*self._stride+max_index, c]=self._delta[x,i,c]
-		self._new_delta = tmp
+		self._grad_input = self.backward_nb(self._delta, self._length, self._stride, self._saved_argmax)
 
 	def backward_update_gradient(self, delta):
 		self._delta = delta
@@ -182,12 +173,12 @@ class AvgPool1D(nndiy.core.Module):
 
 class Flatten(nndiy.core.Module):
 	def forward(self, inp:np.ndarray):
-		batch_sz, _, _ = inp.shape
+		self._batch_sz, self._length, self._chan = inp.shape
 		self._input = inp
-		self._output = inp.reshape(batch_sz, -1)
+		self._output = inp.reshape(self._batch_sz, self._length * self._chan, order='C')
 
 	def backward(self):
-		self._new_delta = self._delta.reshape(self._input.shape)
+		self._grad_input = self._delta.reshape(self._batch_sz, self._length, self._chan, order='C')
 
 	def backward_update_gradient(self, delta):
 		self._delta = delta
@@ -211,4 +202,4 @@ class Dropout(nndiy.core.Module):
 	def backward(self):
 		# Here we only back propagate the delta for inputs which weren't disabled during forward pass,
 		# so we can just multiply elementwise the delta with our mask again
-		self._new_delta = self._delta * self._mask
+		self._grad_input = self._delta * self._mask
