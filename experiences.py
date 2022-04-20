@@ -250,7 +250,7 @@ def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
 	X = min_max_scaler(X, 0, 1)
 	X_test = min_max_scaler(X_test, 0, 1)
 	## Subsampling to avoid number of parameters exploding
-	X, X_test = X[:,::2,::2], X_test[:,::2,::2] 
+	# X, X_test = X[:,::2,::2], X_test[:,::2,::2] 
 	width = X.shape[1]
 	height = X.shape[2]
 	## Reshaping our channels 
@@ -270,10 +270,10 @@ def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
 	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 	## Building and training model
 	model = Sequential()
-	n_epochs = 10
-	early_stopping = EarlyStopping("valid_loss", 0.001, 5)
+	n_epochs = 200
+	early_stopping = EarlyStopping("valid_loss", 0.001, 8)
 	model.add(Convo1D(3, 1, 32), "relu")
-	model.add(MaxPool1D(2,2), "identity")
+	model.add(MaxPool1D(2, 2), "identity")
 	model.add(Flatten(), "identity")
 	model.add(layer=Linear(3136, 
 						   100, 

@@ -179,5 +179,7 @@ class Sequential():
 		res = 0
 		for l in self._net:
 			if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.layer.Convo1D):
+				# print(l._W)
+				print(l._b)
 				res += l._W.size + l._b.size
 		return res
