@@ -27,7 +27,6 @@ class GradientDescent(nndiy.core.Optimizer):
 		if isinstance(l, nndiy.layer.Linear) or isinstance(l, nndiy.layer.Convo1D):
 			l._W -= (self._lr * l._grad_W) - (l._lambda * l._W)
 			l._b -= (self._lr * l._grad_b) - (l._lambda * l._b)
-			l.zero_grad()
 
 
 class StochasticGradientDescent(GradientDescent):
@@ -38,7 +37,6 @@ class StochasticGradientDescent(GradientDescent):
 		for ep in range(1, n_epochs + 1):
 			np.random.shuffle(idx_order)
 			for i in idx_order:
-				# x_elem, y_elem = X[i].reshape(1, -1), y[i].reshape(1, -1)
 				x_elem, y_elem = np.expand_dims(X[i], axis=0), np.expand_dims(y[i], axis=0)
 				self._seq._forward(x_elem, y_elem)
 				self._seq._backward()
@@ -154,6 +152,3 @@ class Adam(nndiy.core.Optimizer):
 			b_update = self._lr * mb_hat / np.where(vb_hat > 0, vb_hat**0.5, self._eps)
 			l._W -= w_update
 			l._b -= b_update
-
-			# Reset gradients after update
-			l.zero_grad()

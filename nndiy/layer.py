@@ -21,7 +21,9 @@ class Linear(nndiy.core.Module):
 			self._W = (np.random.rand(size_in, size_out)*2 - 1) / np.sqrt(size_out)
 		self._b = np.zeros(size_out)
 		self._lambda = regularization
-		self.zero_grad()
+		
+		self._grad_W = np.zeros_like(self._W)
+		self._grad_b = np.zeros_like(self._b)
 
 	def forward(self, data):
 		self._input = data
@@ -30,17 +32,10 @@ class Linear(nndiy.core.Module):
 		self._output = np.where(self._output > OVERFLOW_THRESHOLD, OVERFLOW_THRESHOLD, self._output)
 		self._output = np.where(self._output < -OVERFLOW_THRESHOLD, -OVERFLOW_THRESHOLD, self._output)
 	
-	def backward(self):
-		self._grad_input = self._delta @ self._W.T
-
-	def zero_grad(self):
-		self._grad_W = np.zeros_like(self._W)
-		self._grad_b = np.zeros_like(self._b)
-
-	def backward_update_gradient(self, delta):
-		self._delta = delta
-		self._grad_W += self._input.T @ delta
-		self._grad_b += np.sum(delta, axis=0)
+	def backward(self, delta):
+		self._grad_input = delta @ self._W.T
+		self._grad_W = self._input.T @ delta
+		self._grad_b = np.sum(delta, axis=0)
 
 
 class Convo1D(nndiy.core.Module):
@@ -51,19 +46,16 @@ class Convo1D(nndiy.core.Module):
 		self._lambda = regularization
 
 		self._W:np.ndarray = (np.random.rand(chan_out, kernel_size, chan_in) * 2 - 1) / np.sqrt(chan_in)	# xavier-init
-		self._b = 0
+		self._b = None
 		self._stride = stride
 
 		self._grad_W = np.zeros_like(self._W)
-		self._grad_b = 0
-
-	def zero_grad(self):
-		pass
+		self._grad_b = None
 
 	@staticmethod
 	@njit
-	def forward_nb(W, inp, stride):
-		chan_out, ksz, _ = W.shape
+	def forward_nb(weights, bias, inp, stride):
+		chan_out, ksz, _ = weights.shape
 		batch_sz, length, _ = inp.shape
 		d_out = (length - ksz) // stride + 1
 		output = np.zeros((batch_sz, d_out, chan_out))
@@ -74,8 +66,8 @@ class Convo1D(nndiy.core.Module):
 			for b in range(batch_sz):
 				window = inp[b, i:i+ksz, :]
 				for c in range(chan_out):
-					kernel = W[c, :, :]
-					output[b, idx_out, c] = np.sum(kernel * window)
+					kernel = weights[c, :, :]
+					output[b, idx_out, c] = np.sum(kernel * window) + bias[idx_out, c]
 			idx_out += 1
 		return output
 
@@ -83,10 +75,14 @@ class Convo1D(nndiy.core.Module):
 		# input : (batchsz, length, chan_in)
 		# output: (batchsz, d_out, chan_out)
 		assert inp.shape[2] == self._chan_in
-		self._batch_sz, self._length, _ = inp.shape
+
+		if self._b is None:
+			self._batch_sz, self._length, _ = inp.shape
+			d_out = (self._length - self._ksz) // self._stride + 1
+			self._b = np.zeros((d_out, self._chan_out))
 
 		self._input = inp
-		self._output = self.forward_nb(self._W, inp, self._stride)
+		self._output = self.forward_nb(self._W, self._b, inp, self._stride)
 
 	@staticmethod
 	@njit
@@ -97,6 +93,7 @@ class Convo1D(nndiy.core.Module):
 
 		grad_input = np.zeros_like(inp)
 		grad_W = np.zeros_like(W)
+		grad_b = np.zeros((d_out, chan_out))
 		idx_out = 0
 		for i in range(0, length, stride):
 			if idx_out == d_out:
@@ -106,16 +103,13 @@ class Convo1D(nndiy.core.Module):
 					kernel = W[c, :, :]	# ksz, chan_in
 					grad_input[b, i:i+ksz, :] += kernel * delta[b, idx_out, c]
 					grad_W[c, :, :] += inp[b, i:i+ksz, :] * delta[b, idx_out, c]
+					grad_b[idx_out, c] += delta[b, idx_out, c]
 			idx_out += 1
-		return grad_input, grad_W/batch_sz
+		return grad_input, grad_W/batch_sz, grad_b/batch_sz
 
-	def backward(self):
+	def backward(self, delta):
 		# output: (batch_sz, length, chan_in)
-		self._grad_input, self._grad_W = self.backward_nb(self._W, self._input, self._delta, self._stride)
-					
-	def backward_update_gradient(self, delta):
-		# delta: (batch_sz, d_out, chan_out)
-		self._delta = delta
+		self._grad_input, self._grad_W, self._grad_b = self.backward_nb(self._W, self._input, delta, self._stride)
 
 
 class MaxPool1D(nndiy.core.Module):
@@ -123,9 +117,6 @@ class MaxPool1D(nndiy.core.Module):
 		self._ksz = kernel_size
 		self._stride = stride
 		self._saved_argmax = None
-
-	def zero_grad(self):
-		pass
 
 	@staticmethod
 	@njit
@@ -164,11 +155,8 @@ class MaxPool1D(nndiy.core.Module):
 					grad_input[b, i*stride + saved_argmax[b, i, c], c] = delta[b, i, c]
 		return grad_input
 
-	def backward(self):
-		self._grad_input = self.backward_nb(self._delta, self._length, self._stride, self._saved_argmax)
-
-	def backward_update_gradient(self, delta):
-		self._delta = delta
+	def backward(self, delta):
+		self._grad_input = self.backward_nb(delta, self._length, self._stride, self._saved_argmax)
 
 
 class Flatten(nndiy.core.Module):
@@ -177,11 +165,8 @@ class Flatten(nndiy.core.Module):
 		self._input = inp
 		self._output = inp.reshape(self._batch_sz, self._length * self._chan, order='C')
 
-	def backward(self):
-		self._grad_input = self._delta.reshape(self._batch_sz, self._length, self._chan, order='C')
-
-	def backward_update_gradient(self, delta):
-		self._delta = delta
+	def backward(self, delta):
+		self._grad_input = delta.reshape(self._batch_sz, self._length, self._chan, order='C')
 
 
 class Dropout(nndiy.core.Module):
@@ -196,10 +181,7 @@ class Dropout(nndiy.core.Module):
 		# To randomly disable the inputs we can multipy elementwise the input with the mask
 		self._output = self._input * self._mask
 
-	def backward_update_gradient(self, delta):
-		self._delta = delta
-
-	def backward(self):
+	def backward(self, delta):
 		# Here we only back propagate the delta for inputs which weren't disabled during forward pass,
 		# so we can just multiply elementwise the delta with our mask again
-		self._grad_input = self._delta * self._mask
+		self._grad_input = delta * self._mask

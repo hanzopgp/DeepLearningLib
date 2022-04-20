@@ -9,8 +9,8 @@ class LeakyReLU(nndiy.core.Activation):
 		self._input = data
 		self._output = np.where(self._input > 0, self._input, self.ALPHA * self._input)
 
-	def backward(self):
-		self._grad_input = np.where(self._input > 0, 1, self.ALPHA) * self._delta
+	def backward(self, delta):
+		self._grad_input = np.where(self._input > 0, 1, self.ALPHA) * delta
 
 
 class Identity(nndiy.core.Activation):
@@ -18,8 +18,8 @@ class Identity(nndiy.core.Activation):
 		self._input = data
 		self._output = self._input
 
-	def backward(self):
-		self._grad_input = np.ones_like(self._input) * self._delta
+	def backward(self, delta):
+		self._grad_input = np.ones_like(self._input) * delta
 
 
 class ReLU(nndiy.core.Activation):
@@ -27,8 +27,8 @@ class ReLU(nndiy.core.Activation):
 		self._input = data
 		self._output = np.maximum(0, self._input)
 
-	def backward(self):
-		self._grad_input = np.where(self._input > 0, 1, 0) * self._delta
+	def backward(self, delta):
+		self._grad_input = np.where(self._input > 0, 1, 0) * delta
 
 
 class Sigmoid(nndiy.core.Activation):
@@ -36,9 +36,9 @@ class Sigmoid(nndiy.core.Activation):
 		self._input = data
 		self._output = 1/(1 + np.exp(-data))
 
-	def backward(self):
+	def backward(self, delta):
 		sigmoid = 1/(1 + np.exp(-self._input))
-		self._grad_input = sigmoid * (1 - sigmoid) * self._delta
+		self._grad_input = sigmoid * (1 - sigmoid) * delta
 
 
 class Softmax(nndiy.core.Activation):
@@ -47,10 +47,10 @@ class Softmax(nndiy.core.Activation):
 		exp_ = np.exp(self._input)
 		self._output = exp_ / np.sum(exp_, axis=1).reshape(-1, 1)
 
-	def backward(self):
+	def backward(self, delta):
 		_exp = np.exp(self._input)
 		soft = _exp / np.sum(_exp, axis=1).reshape(-1, 1)
-		self._grad_input = self._delta * (soft*(1-soft))
+		self._grad_input = delta * (soft*(1-soft))
 
 
 class Tanh(nndiy.core.Activation):
@@ -58,5 +58,5 @@ class Tanh(nndiy.core.Activation):
 		self._input = data
 		self._output = np.tanh(self._input)
 
-	def backward(self):
-		self._grad_input = (1 - np.tanh(self._input)**2) * self._delta
+	def backward(self, delta):
+		self._grad_input = (1 - np.tanh(self._input)**2) * delta

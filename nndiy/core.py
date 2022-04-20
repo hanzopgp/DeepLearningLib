@@ -13,28 +13,19 @@ class Module():
 		The forward pass can occur on a MLP, an activation layer or a loss layer."""
 		raise NotImplementedError()
 
-	def backward(self):
+	def backward(self, delta:np.ndarray):
 		"""Computes the backward pass using the input from the forward pass.
-		This is the gradient back-propagated through the modules in order to
+		Delta is the gradient back-propagated through the modules in order to
 		compute previous modules' gradients."""
 		raise NotImplementedError()
 
 	def zero_grad(self):
 		"""Resets gradient values"""
 		raise NotImplementedError()
-
-	def backward_update_gradient(self, delta:np.ndarray):
-		"""Computes the weights gradient using the input from the forward pass.
-		This is the gradient we will keep in order to update the parameters of the module.
-		Since we might use mini-batch or batch gradient descent, the gradient has to be added each pass.
-		The `delta` argument is the gradient coming from the module after.
-		We need to multiply by `delta` after computing our current gradient"""
-		raise NotImplementedError()
 	
 
 class Activation(Module):
-	def backward_update_gradient(self, delta:np.ndarray):
-		self._delta = delta
+	pass
 
 
 class Loss(Module):
