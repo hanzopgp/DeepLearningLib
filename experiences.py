@@ -12,6 +12,7 @@ np.random.seed(42)
 
 label_name_fashion_mnist = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 label_name_digits_mnist = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+label_name_cifar10 = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
 
 def execute_mlp_classification_model(X, y, X_test, y_test, label_name, latent=False):
 	if not latent:
@@ -180,6 +181,20 @@ def build_noisy_mnist_digits_dataset(X, X_test, noise_amount, show=False):
 			plt.show()
 	return X_noise, X_test_noise
 
+def random_noise_test(X, noise_amount, show=False):
+	X_noise = X.copy()
+	print("--> Adding random noise for test")
+	for i in tqdm(range(X.shape[0])):
+		for j in range(X.shape[1]):
+			random_noise_amount = np.random.rand()*(noise_amount-0.1)
+			if np.random.rand(1) > 1-random_noise_amount:
+				X_noise[i][j] = np.random.rand()*255
+	if show:			
+		for img in X_noise[:5]:
+			plt.imshow(img.reshape(28, 28))
+			plt.show()
+	return X_noise
+
 def remove_noise_autoencoder(dataset, noise_amount):
 	## Loading fashion MNIST dataset
 	if dataset == "fashion_mnist":
@@ -187,14 +202,16 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	elif dataset == "digits_mnist":     
 		loader = tf.keras.datasets.mnist  
 	(X, _), (X_test, _) = loader.load_data()
-	size = 3_000
-	X, X_test = X[:size], X_test[:size]
+	# size = 300
+	# X, X_test = X[:size], X_test[:size]
 	width = X.shape[1]
 	height = X.shape[2]
 	## Reshaping to get linear data in order to use our feed forward model
 	X = X.reshape(X.shape[0], -1)
 	X_test = X_test.reshape(X_test.shape[0], -1)
 	## Adding noise to dataset
+	X_test, X_test_noise_truth = split_X(X_test, train_split=0.9, shuffle=False)
+	X_test_noise_dif = random_noise_test(X_test_noise_truth, noise_amount, show=False)
 	X_noise, X_test_noise = build_noisy_mnist_digits_dataset(X, X_test, noise_amount)
 	## Normalizing our data
 	X = min_max_scaler(X, 0, 1)
@@ -205,10 +222,10 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	n_features = X.shape[1]
 	n_classes = X.shape[1]
 	init_type = "xavier"
-	learning_rate = 5e-5 ## Test 1e-3 comme pr 0.1
+	learning_rate = 1e-4 ## Test 1e-3 comme pr 0.1
 	decay = learning_rate*10
 	regularization = 1e-9 
-	n_epochs = 100
+	n_epochs = 200
 	train_split = 0.8
 	early_stopping = EarlyStopping("valid_loss", 0.001, 15)
 	X_train_noise, X_valid_noise = split_X(X_noise, train_split=train_split, shuffle=False)
@@ -217,7 +234,6 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	model = Sequential()
 	model.add(layer=Linear(n_features, 256, init=init_type, regularization=regularization), activation="relu")
 	model.add(layer=Linear(256, 180, init=init_type, regularization=regularization), activation="relu")
-	model.add(layer=Dropout(rate=0.1))
 	model.add(layer=Linear(180, 128, init=init_type, regularization=regularization), activation="relu")
 	model.add(layer=Linear(128, 180, init=init_type, regularization=regularization), activation="relu")
 	model.add(layer=Linear(180, 256, init=init_type, regularization=regularization), activation="relu")
@@ -232,16 +248,27 @@ def remove_noise_autoencoder(dataset, noise_amount):
 			  verbose=True,
 			  early_stopping=early_stopping)
 	model.plot_stats()
-	preds = model.predict(X_test_noise)
+	# preds = model.predict(X_test_noise)
 	## Show results
-	for i in range(3):
-		plt.imshow(X_test_noise[i].reshape(width, height))
+	# for i in range(3):
+	# 	plt.imshow(X_test_noise[i].reshape(width, height))
+	# 	plt.title("Input image")
+	# 	plt.show()
+	# 	plt.imshow(preds[i].reshape(width, height))
+	# 	plt.title("Reconstructed image")
+	# 	plt.show()
+	# 	plt.imshow(X_test[i].reshape(width, height))
+	# 	plt.title("Ground truth image")
+	# 	plt.show()
+	preds_random_noise = model.predict(X_test_noise_dif)
+	for i in range(20):
+		plt.imshow(X_test_noise_dif[i].reshape(width, height))
 		plt.title("Input image")
 		plt.show()
-		plt.imshow(preds[i].reshape(width, height))
+		plt.imshow(preds_random_noise[i].reshape(width, height))
 		plt.title("Reconstructed image")
 		plt.show()
-		plt.imshow(X_test[i].reshape(width, height))
+		plt.imshow(X_test_noise_truth[i].reshape(width, height))
 		plt.title("Ground truth image")
 		plt.show()
 
@@ -270,12 +297,12 @@ def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
 	X_train, X_valid, y_train, y_valid = X_train[:size], X_valid[:size], y_train[:size], y_valid[:size]
 	## Building and training model
 	model = Sequential()
-	n_epochs = 10
+	n_epochs = 200
 	early_stopping = EarlyStopping("valid_loss", 0.001, 5)
-	model.add(Convo1D(3, 1, 32), "tanh")
+	model.add(Convo1D(3, 3, 32), "tanh")
 	model.add(MaxPool1D(2,2), "identity")
 	model.add(Flatten(), "identity")
-	model.add(layer=Linear(12512, 
+	model.add(layer=Linear(16352, 
 						   100, 
 						   init="xavier"), 
 						   activation="tanh")
@@ -298,9 +325,9 @@ def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
 			  early_stopping=early_stopping)
 	model.plot_stats()
 	## Show results
-	X_test = X_test[:5]
+	X_test = X_test[:20]
 	preds = np.argmax(model.predict(X_test), axis=1)
-	for i in range(3):
+	for i in range(15):
 		plt.imshow(X_test[i].reshape(width, height))
 		plt.title(str("Prediction :" + label_name[preds[i]] + " Ground truth label :" + str(y_test[i])))
 		plt.show()
@@ -313,6 +340,9 @@ def classification_cnn(dataset):
 	elif dataset == "digits_mnist":     
 		loader = tf.keras.datasets.mnist
 		label_name = label_name_digits_mnist     
+	elif dataset == "ciphar10":
+		loader = tf.keras.datasets.cifar10
+		label_name = label_name_cifar10 
 	(X, y), (X_test, y_test) = loader.load_data()
 	execute_cnn_classification_model(X, y, X_test, y_test, label_name)
 	
@@ -327,8 +357,9 @@ def classification_cnn(dataset):
 
 ## Autoencoder to remove noise 
 # remove_noise_autoencoder("fashion_mnist", 0.1)
-# remove_noise_autoencoder("digits_mnist", 0.8)
+# remove_noise_autoencoder("digits_mnist", 0.7)
 
 ## Classic classification with a CNN model
 # classification_cnn("fashion_mnist")
-classification_cnn("digits_mnist")
+# classification_cnn("digits_mnist")
+classification_cnn("ciphar10")

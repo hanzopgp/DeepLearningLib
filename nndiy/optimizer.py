@@ -36,7 +36,7 @@ class StochasticGradientDescent(GradientDescent):
 		idx_order = np.arange(n)
 		for ep in range(1, n_epochs + 1):
 			np.random.shuffle(idx_order)
-			for i in idx_order:
+			for i in tqdm(idx_order):
 				x_elem, y_elem = np.expand_dims(X[i], axis=0), np.expand_dims(y[i], axis=0)
 				self._seq._forward(x_elem, y_elem)
 				self._seq._backward()
