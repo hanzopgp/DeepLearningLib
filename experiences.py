@@ -227,7 +227,7 @@ def remove_noise_autoencoder(dataset, noise_amount):
 	regularization = 1e-9 
 	n_epochs = 200
 	train_split = 0.8
-	early_stopping = EarlyStopping("valid_loss", 0.001, 15)
+	early_stopping = EarlyStopping("valid_loss", 0.001, 5)
 	X_train_noise, X_valid_noise = split_X(X_noise, train_split=train_split, shuffle=False)
 	X_train, X_valid = split_X(X, train_split=train_split, shuffle=False)
 	## Building and training autoencoder model
@@ -299,13 +299,17 @@ def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
 	model = Sequential()
 	n_epochs = 200
 	early_stopping = EarlyStopping("valid_loss", 0.001, 5)
-	model.add(Convo1D(3, 3, 32), "tanh")
+	model.add(Convo1D(3, 3, 32), "relu")
+	model.add(MaxPool1D(2,2), "identity")
+	model.add(Convo1D(3, 32, 64), "relu")
+	model.add(MaxPool1D(2,2), "identity")
+	model.add(Convo1D(3, 64, 128), "relu")
 	model.add(MaxPool1D(2,2), "identity")
 	model.add(Flatten(), "identity")
-	model.add(layer=Linear(16352, 
+	model.add(layer=Linear(16128, 
 						   100, 
 						   init="xavier"), 
-						   activation="tanh")
+						   activation="relu")
 	model.add(layer=Linear(100, 
 						   10, 
 						   init="xavier"), 
@@ -328,7 +332,7 @@ def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
 	X_test = X_test[:20]
 	preds = np.argmax(model.predict(X_test), axis=1)
 	for i in range(15):
-		plt.imshow(X_test[i].reshape(width, height))
+		plt.imshow(X_test[i].reshape(width, height, X_test.shape[3]))
 		plt.title(str("Prediction :" + label_name[preds[i]] + " Ground truth label :" + str(y_test[i])))
 		plt.show()
 
