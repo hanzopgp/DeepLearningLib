@@ -248,20 +248,21 @@ def remove_noise_autoencoder(dataset, noise_amount):
 			  verbose=True,
 			  early_stopping=early_stopping)
 	model.plot_stats()
-	# preds = model.predict(X_test_noise)
-	## Show results
-	# for i in range(3):
-	# 	plt.imshow(X_test_noise[i].reshape(width, height))
-	# 	plt.title("Input image")
-	# 	plt.show()
-	# 	plt.imshow(preds[i].reshape(width, height))
-	# 	plt.title("Reconstructed image")
-	# 	plt.show()
-	# 	plt.imshow(X_test[i].reshape(width, height))
-	# 	plt.title("Ground truth image")
-	# 	plt.show()
+	preds = model.predict(X_test_noise)
+	# Show results
+	for i in range(10):
+		plt.imshow(X_test_noise[i].reshape(width, height))
+		plt.title("Input image")
+		plt.show()
+		plt.imshow(preds[i].reshape(width, height))
+		plt.title("Reconstructed image")
+		plt.show()
+		plt.imshow(X_test[i].reshape(width, height))
+		plt.title("Ground truth image")
+		plt.show()
 	preds_random_noise = model.predict(X_test_noise_dif)
-	for i in range(20):
+	print("Showing test images with different amount of noise now")
+	for i in range(10):
 		plt.imshow(X_test_noise_dif[i].reshape(width, height))
 		plt.title("Input image")
 		plt.show()
@@ -299,23 +300,19 @@ def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
 	model = Sequential()
 	n_epochs = 200
 	early_stopping = EarlyStopping("valid_loss", 0.001, 5)
-	model.add(Convo1D(3, 3, 32), "relu")
-	model.add(MaxPool1D(2,2), "identity")
-	model.add(Convo1D(3, 32, 64), "relu")
-	model.add(MaxPool1D(2,2), "identity")
-	model.add(Convo1D(3, 64, 128), "relu")
+	model.add(Convo1D(3, 1, 32), "tanh")
 	model.add(MaxPool1D(2,2), "identity")
 	model.add(Flatten(), "identity")
-	model.add(layer=Linear(16128, 
+	model.add(layer=Linear(12512, 
 						   100, 
 						   init="xavier"), 
-						   activation="relu")
+						   activation="tanh")
 	model.add(layer=Linear(100, 
 						   10, 
 						   init="xavier"), 
 						   activation="softmax")
 	model.compile(loss="sparse_categorical_crossentropy", 
-				  optimizer="adam",
+				  optimizer="sgd",
 				  learning_rate=learning_rate,
 				  metric="accuracy",
 				  decay=decay)
@@ -332,7 +329,7 @@ def execute_cnn_classification_model(X, y, X_test, y_test, label_name):
 	X_test = X_test[:20]
 	preds = np.argmax(model.predict(X_test), axis=1)
 	for i in range(15):
-		plt.imshow(X_test[i].reshape(width, height, X_test.shape[3]))
+		plt.imshow(X_test[i].reshape(width, height))
 		plt.title(str("Prediction :" + label_name[preds[i]] + " Ground truth label :" + str(y_test[i])))
 		plt.show()
 
@@ -365,5 +362,5 @@ def classification_cnn(dataset):
 
 ## Classic classification with a CNN model
 # classification_cnn("fashion_mnist")
-# classification_cnn("digits_mnist")
-classification_cnn("ciphar10")
+classification_cnn("digits_mnist")
+# classification_cnn("ciphar10")
