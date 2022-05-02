@@ -36,7 +36,6 @@ class EarlyStoppingHandler():
 		if np.abs(valid_loss + self.es.min_delta) < np.abs(self.best_valid_loss):
 			self.best_ep = ep
 			self.best_valid_loss = valid_loss
-			# self.best_model = self._net
 			self.cpt_patience = 0
 		else:
 			self.cpt_patience += 1
@@ -49,7 +48,6 @@ class EarlyStoppingHandler():
 		if np.abs(train_loss + self.es.min_delta) < np.abs(self.best_train_loss):
 			self.best_ep = ep
 			self.best_train_loss = train_loss
-			# self.best_model = self._net
 			self.cpt_patience = 0
 		else:
 			self.cpt_patience += 1
@@ -62,7 +60,6 @@ class EarlyStoppingHandler():
 		if (valid_acc - self.es.min_delta) > self.best_valid_acc:
 			self.best_ep = ep
 			self.best_valid_acc = valid_acc
-			# self.best_model = self._net
 			self.cpt_patience = 0
 		else:
 			self.cpt_patience += 1
@@ -75,7 +72,6 @@ class EarlyStoppingHandler():
 		if (train_acc - self.es.min_delta) > self.best_train_acc:
 			self.best_ep = ep
 			self.best_train_acc = train_acc
-			# self.best_model = self._net
 			self.cpt_patience = 0
 		else:
 			self.cpt_patience += 1
