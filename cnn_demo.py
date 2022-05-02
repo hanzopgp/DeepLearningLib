@@ -7,9 +7,9 @@ from nndiy.layer import Linear, Convo1D, MaxPool1D, Flatten
 from nndiy.early_stopping import EarlyStopping
 from nndiy.utils import min_max_scaler, split_data
 
-np.random.seed(42)
 
 label_name_digits_mnist = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
 
 def execute_classification_model(X, y, X_test, y_test, label_name, latent=False):
 	width = X.shape[1]
@@ -69,7 +69,10 @@ def execute_classification_model(X, y, X_test, y_test, label_name, latent=False)
 			plt.title(str("Prediction :" + label_name[preds[i]] + " Ground truth label :" + str(y_test[i])))
 			plt.show()
 
-loader = tf.keras.datasets.mnist
-label_name = label_name_digits_mnist     
-(X, y), (X_test, y_test) = loader.load_data()
-execute_classification_model(X, y, X_test, y_test, label_name)
+
+if __name__ == '__main__':
+	np.random.seed(42)
+	loader = tf.keras.datasets.mnist
+	label_name = label_name_digits_mnist     
+	(X, y), (X_test, y_test) = loader.load_data()
+	execute_classification_model(X, y, X_test, y_test, label_name)

@@ -1,4 +1,4 @@
-import tensorflow as tf ## Usefull for datasets
+import tensorflow as tf	## For loading datasets
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -155,7 +155,7 @@ def reconstruction_mlp(dataset, size_latent_space):
 	## After that we split our latent space data
 	X_train, X_test, y_train, y_test = split_data(latent_space_X, latent_space_y, train_split=train_split, shuffle=True)
 	## And we train a classifier with the compressed data
-	execute_classification_model(X_train, y_train, X_test, y_test, label_name=label_name_digits_mnist, latent=True)
+	execute_mlp_classification_model(X_train, y_train, X_test, y_test, label_name=label_name_digits_mnist, latent=True)
 
 def build_noisy_mnist_digits_dataset(X, X_test, noise_amount, show=False):
 	X_noise = X.copy()
